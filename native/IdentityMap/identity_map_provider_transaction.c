@@ -1,6 +1,6 @@
 #include "../headers/identity_map_headers.h"
 
-TX_RESPONSE identity_map_provider_transaction(PayloadTransaction* payload, TX_STATUS tx_status){
+FnResponse identity_map_provider_transaction(PayloadTransaction* payload, TX_STATUS tx_status){
     HashIdentityData* data = (HashIdentityData*) payload->data;
     HashIdentityTransactionController* controller = (HashIdentityTransactionController*) payload->target;
 
@@ -10,16 +10,16 @@ TX_RESPONSE identity_map_provider_transaction(PayloadTransaction* payload, TX_ST
     if (tx_status == TX_STATUS_COMMITED){
         controller->persistent_data.hash = h;
         controller->persistent_data.value = value;
-        return TX_RESPONSE_OK;
+        return RES_STANDARD_SUCCESS;
     }
 
     if (tx_status == TX_STATUS_ABORTED){
         force_status(&controller->status, TX_ELEMENT_LOCKED);
-        controller->staged_data.hash = EMPTY_SLOT_HASH;
-        controller->staged_data.value = EMPTY_SLOT_HASH;
+        controller->staged_data.hash = RES_IDENTIFIER_EMPTY;
+        controller->staged_data.value = RES_IDENTIFIER_EMPTY;
         force_status(&controller->status, TX_ELEMENT_NO_CONCURRENCY);
-        return TX_RESPONSE_OK;
+        return RES_STANDARD_SUCCESS;
     }
 
-    return TX_RESPONSE_ERR_UNKNOWN;
+    return RES_SYS_ERR_UNKNOWN;
 }

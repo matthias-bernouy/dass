@@ -7,12 +7,12 @@ uint64_t create_transaction()
         uint64_t index = atomic_fetch_add_explicit(&global_transaction_counter, 1, memory_order_relaxed);
         MapTransactionEntry *map_entry = &transaction_map[index & (MAX_TRANSACTIONS - 1)];
         Transaction *tx = &map_entry->ptr;
-        if (try_change_status(&tx->status, TRANSACTION_STATUS_FREE_MASK, TRANSACTION_STATUS_STARTED_MASK))
+        if (try_change_status(&tx->status, TX_STATUS_FREE, TX_STATUS_STARTED))
         {
             tx->transaction_id = index;
             tx->timestamp = get_now_nanoseconds();
             return index;
         }
     }
-    return 0x0000000000000000ULL; // Is full
+    return RES_IDENTIFIER_FULL;
 }

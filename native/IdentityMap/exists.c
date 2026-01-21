@@ -1,6 +1,6 @@
 #include "../headers/identity_map_headers.h"
 
-ReturnCodes exists(const uint8_t *key, size_t length)
+FnResponse exists(const uint8_t *key, size_t length)
 {
     uint64_t h = xxh32_fixed(key, length, 0);
     uint32_t index = (uint32_t)(h & HASHMAP_MASK);
@@ -8,17 +8,17 @@ ReturnCodes exists(const uint8_t *key, size_t length)
 
     while (max_iterations--)
     {
-        uint64_t slot_state = get_slot_state_with_comparing_hash(index, h);
+        FnResponse slot_state = get_slot_state_with_comparing_hash(index, h);
 
-        if (slot_state == SLOT_EQUALS) return EXISTS;
-        if (slot_state == SLOT_AVAILABLE) return NOT_FOUND;
-        if (slot_state == SLOT_DELETED || slot_state == SLOT_USED) {
+        if (slot_state == RES_IDENTITY_MAP_SLOT_EQUALS) return RES_IDENTIFIER_EXISTS;
+        if (slot_state == RES_IDENTITY_MAP_SLOT_AVAILABLE) return RES_IDENTIFIER_NOT_FOUND;
+        if (slot_state == RES_IDENTITY_MAP_SLOT_DELETED || slot_state == RES_IDENTITY_MAP_SLOT_USED) {
             index = (index + 1) & HASHMAP_MASK;
             continue;
         }
-        if (slot_state == SLOT_TIMEOUT) {
-            return ERR_TIMEOUT;
+        if (slot_state == RES_IDENTITY_MAP_SLOT_TIMEOUT) {
+            return RES_SYS_ERR_TIMEOUT;
         }
     }
-    return ERR_MAX_ITERATION;
+    return RES_SYS_ERR_TIMEOUT;
 }

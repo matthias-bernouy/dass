@@ -1,10 +1,10 @@
 #include "../headers/identity_map_headers.h"
 
-uint64_t get_slot_state_with_comparing_hash(const uint32_t index, const uint64_t hash)
+FnResponse get_slot_state_with_comparing_hash(const uint32_t index, const uint64_t hash)
 {
     uint32_t max_iterations = 1024;
-    uint32_t return_status = SLOT_AVAILABLE;
-    uint64_t timestamp = 0x000000000000000;
+    FnResponse return_status = RES_IDENTITY_MAP_SLOT_AVAILABLE;
+    uint64_t timestamp = 0x0000000000000000;
 
     while (max_iterations--)
     {
@@ -20,7 +20,7 @@ uint64_t get_slot_state_with_comparing_hash(const uint32_t index, const uint64_t
                 timestamp = timestamp_to_compare;
             }
             if (timestamp_to_compare - timestamp > 1000000ULL){
-                return SLOT_TIMEOUT;
+                return RES_IDENTITY_MAP_SLOT_TIMEOUT;
             }
             max_iterations++;
             _mm_pause();
@@ -28,16 +28,16 @@ uint64_t get_slot_state_with_comparing_hash(const uint32_t index, const uint64_t
         } else {
             hash_in_slot = identity_hashed_map[index].persistent_data.hash;
         }
-        timestamp = 0x000000000000000;
+        timestamp = 0x0000000000000000;
 
-        if ( hash_in_slot == EMPTY_SLOT_HASH ) {
-            return_status = SLOT_AVAILABLE;
-        } else if ( hash_in_slot == DELETED_SLOT_HASH ) {
-            return_status = SLOT_DELETED;
+        if ( hash_in_slot == RES_IDENTIFIER_EMPTY ) {
+            return_status = RES_IDENTITY_MAP_SLOT_AVAILABLE;
+        } else if ( hash_in_slot == RES_IDENTIFIER_DELETED ) {
+            return_status = RES_IDENTITY_MAP_SLOT_DELETED;
         } else if (hash_in_slot == hash){
-            return_status = SLOT_EQUALS;
+            return_status = RES_IDENTITY_MAP_SLOT_EQUALS;
         } else {
-            return_status = SLOT_USED;
+            return_status = RES_IDENTITY_MAP_SLOT_USED;
         }
 
         uint64_t status_verify = get_status(&identity_hashed_map[index].status);
@@ -51,5 +51,5 @@ uint64_t get_slot_state_with_comparing_hash(const uint32_t index, const uint64_t
         }
 
     }
-    return SLOT_TIMEOUT;
+    return RES_IDENTITY_MAP_SLOT_TIMEOUT;
 }
