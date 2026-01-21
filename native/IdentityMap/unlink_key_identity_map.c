@@ -1,6 +1,6 @@
 #include "../headers/identity_map_headers.h"
 
-// ReturnCodes unlink(const uint8_t *key, size_t length, uint64_t id_transaction)
+// ReturnCodes unlink_key_identity_map(const uint8_t *key, size_t length, uint64_t id_transaction)
 // {
 
 //     uint64_t h = xxh32_fixed(key, length, 0);

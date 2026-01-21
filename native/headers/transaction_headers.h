@@ -79,9 +79,9 @@ extern MapHandlerEntry handler_map[TRANSACTION_MAX_HANDLER];
 
 uint64_t create_transaction();
 Transaction* get_transaction(uint64_t transaction_id);
-FnResponse register_handler(uint32_t index, ActionHandler handler);
-FnResponse add_action_to_transaction(uint64_t transaction_id, uint32_t action_provider, PayloadTransaction *payload);
+FnResponse register_handler_transaction(uint32_t index, ActionHandler handler);
+FnResponse add_action_transaction(uint64_t transaction_id, uint32_t action_provider, PayloadTransaction *payload);
 FnResponse commit_transaction(uint64_t transaction_id);
-FnResponse add_dependency_to_transaction(uint64_t my_id, uint64_t owner_id);
+FnResponse add_dependency_transaction(uint64_t my_id, uint64_t owner_id);
 
 #endif

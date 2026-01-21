@@ -1,6 +1,6 @@
 #include "../headers/identity_map_headers.h"
 
-FnResponse link(const uint8_t *key, size_t length, uint64_t value, uint64_t id_transaction)
+FnResponse link_key_identity_map(const uint8_t *key, size_t length, uint64_t value, uint64_t id_transaction)
 {
     uint64_t h = xxh32_fixed(key, length, 0);
     uint32_t index = (uint32_t)(h & HASHMAP_MASK);
@@ -8,7 +8,7 @@ FnResponse link(const uint8_t *key, size_t length, uint64_t value, uint64_t id_t
 
     while (max_iterations--)
     {
-        uint64_t slot_state = get_slot_state_with_comparing_hash(index, h);
+        uint64_t slot_state = get_slot_state_with_comparing_hash_identity_map(index, h);
         if (slot_state == RES_IDENTITY_MAP_SLOT_EQUALS) return RES_IDENTIFIER_EXISTS;
         if (slot_state == RES_IDENTITY_MAP_SLOT_TIMEOUT) return RES_SYS_ERR_TIMEOUT;
         if (slot_state == RES_IDENTITY_MAP_SLOT_USED) {
@@ -42,13 +42,13 @@ FnResponse link(const uint8_t *key, size_t length, uint64_t value, uint64_t id_t
             payload.size   = sizeof(HashIdentityData);
             payload.type   = IDENTITY_MAP_PROVIDER;
             
-            FnResponse add_action_response = add_action_to_transaction(id_transaction, IDENTITY_MAP_PROVIDER, &payload);
+            FnResponse add_action_response = add_action_transaction(id_transaction, IDENTITY_MAP_PROVIDER, &payload);
             if ( add_action_response != RES_STANDARD_SUCCESS ){
                 force_status(&identity_hashed_map[index].status, current_status);
                 return RES_SYS_ERR_TIMEOUT;
             }
 
-            FnResponse add_dependency_response = add_dependency_to_transaction(id_transaction, identity_hashed_map[index].current_transaction_id);
+            FnResponse add_dependency_response = add_dependency_transaction(id_transaction, identity_hashed_map[index].current_transaction_id);
             if ( add_dependency_response != RES_STANDARD_SUCCESS ){
                 force_status(&identity_hashed_map[index].status, current_status);
                 return RES_SYS_ERR_TIMEOUT;

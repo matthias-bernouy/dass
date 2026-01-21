@@ -1,6 +1,6 @@
 #include "../headers/identity_map_headers.h"
 
-FnResponse exists(const uint8_t *key, size_t length)
+FnResponse key_exists_identity_map(const uint8_t *key, size_t length)
 {
     uint64_t h = xxh32_fixed(key, length, 0);
     uint32_t index = (uint32_t)(h & HASHMAP_MASK);
@@ -8,7 +8,7 @@ FnResponse exists(const uint8_t *key, size_t length)
 
     while (max_iterations--)
     {
-        FnResponse slot_state = get_slot_state_with_comparing_hash(index, h);
+        FnResponse slot_state = get_slot_state_with_comparing_hash_identity_map(index, h);
 
         if (slot_state == RES_IDENTITY_MAP_SLOT_EQUALS) return RES_IDENTIFIER_EXISTS;
         if (slot_state == RES_IDENTITY_MAP_SLOT_AVAILABLE) return RES_IDENTIFIER_NOT_FOUND;

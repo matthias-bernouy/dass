@@ -1,6 +1,6 @@
 // #include "../headers/transaction_headers.h"
 
-// bool write_transaction_to_disk(uint64_t transaction_id)
+// bool write_to_disk_transaction(uint64_t transaction_id)
 // {
 //     MapTransactionEntry *map_entry = &transaction_map[transaction_id & (MAX_TRANSACTIONS - 1)];
 //     Transaction *transaction = get_transaction(transaction_id);

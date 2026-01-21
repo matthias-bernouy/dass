@@ -24,9 +24,9 @@ typedef struct
 extern _Atomic uint64_t counter_identity_map;
 extern HashIdentityTransactionController identity_hashed_map[HASHMAP_SIZE];
 
-FnResponse get_slot_state_with_comparing_hash(const uint32_t index, const uint64_t hash);
-FnResponse exists(const uint8_t *key, size_t length);
-FnResponse link(const uint8_t *key, size_t length, uint64_t value, uint64_t id_transaction);
-FnResponse identity_map_provider_transaction(PayloadTransaction* payload, TX_STATUS tx_status);
+FnResponse get_slot_state_with_comparing_hash_identity_map(const uint32_t index, const uint64_t hash);
+FnResponse key_exists_identity_map(const uint8_t *key, size_t length);
+FnResponse link_key_identity_map(const uint8_t *key, size_t length, uint64_t value, uint64_t id_transaction);
+FnResponse transaction_provider_identity_map(PayloadTransaction* payload, TX_STATUS tx_status);
 
 #endif

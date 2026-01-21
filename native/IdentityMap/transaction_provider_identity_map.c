@@ -1,6 +1,6 @@
 #include "../headers/identity_map_headers.h"
 
-FnResponse identity_map_provider_transaction(PayloadTransaction* payload, TX_STATUS tx_status){
+FnResponse transaction_provider_identity_map(PayloadTransaction* payload, TX_STATUS tx_status){
     HashIdentityData* data = (HashIdentityData*) payload->data;
     HashIdentityTransactionController* controller = (HashIdentityTransactionController*) payload->target;
 

@@ -1,6 +1,6 @@
 #include "../headers/transaction_headers.h"
 
-FnResponse add_dependency_to_transaction(uint64_t my_id, uint64_t owner_id)
+FnResponse add_dependency_transaction(uint64_t my_id, uint64_t owner_id)
 {
     if (my_id > owner_id){
         Transaction *tx = get_transaction(my_id);

@@ -1,6 +1,6 @@
 #include "../headers/identity_map_headers.h"
 
-FnResponse get_slot_state_with_comparing_hash(const uint32_t index, const uint64_t hash)
+FnResponse get_slot_state_with_comparing_hash_identity_map(const uint32_t index, const uint64_t hash)
 {
     uint32_t max_iterations = 1024;
     FnResponse return_status = RES_IDENTITY_MAP_SLOT_AVAILABLE;
