@@ -1,0 +1,14 @@
+{
+    "name": "@befive/dec-atomic-shared",
+    "version": "0.0.1",
+    "description": "A multi worker state with atomic locks",
+    "main": "dist/index.js",
+    "types": "dist/types/index.d.ts",
+    "files": [
+        "dist/",
+        "readme.md"
+    ],
+    "scripts": {
+        "bun:build": "bun build.ts"
+    }
+}
