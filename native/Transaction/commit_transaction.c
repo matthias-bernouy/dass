@@ -4,7 +4,7 @@ FnResponse commit_transaction(uint64_t transaction_id)
 {
     // Get the transaction.
     Transaction *tx = get_transaction(transaction_id);
-    if (tx == NULL) return RES_SYS_ERR_CORRUPTED;
+    if (tx == NULL) return RES_TX_NO_TRANSACTION_FOUND;
 
     // Set to waiting.
     if (is_status(&tx->status, TX_STATUS_STARTED)) {
@@ -17,9 +17,10 @@ FnResponse commit_transaction(uint64_t transaction_id)
     // Check dependencies status.
     for (uint32_t i = 0; i < tx->depends_on_counter; i++)
     {
+        return tx->depends_on_counter;
         uint64_t dep_id = tx->depends_on[i];
         Transaction *dep_tx = get_transaction(dep_id);
-        if (dep_tx == NULL) return RES_SYS_ERR_CORRUPTED;
+        if (dep_tx == NULL) return RES_TX_NO_TRANSACTION_FOUND;
         TX_STATUS status_dependency = atomic_load_explicit(&dep_tx->status, memory_order_acquire);
 
         if (status_dependency == TX_STATUS_ABORTED) {
@@ -36,7 +37,7 @@ FnResponse commit_transaction(uint64_t transaction_id)
             status_dependency != TX_STATUS_LOCAL_PERSISTED &&
             status_dependency != TX_STATUS_GLOBAL_PERSISTED)
         {
-            return RES_SYS_ERR_CORRUPTED;
+            return RES_TX_STATUS_ERROR;
         }
     }
 

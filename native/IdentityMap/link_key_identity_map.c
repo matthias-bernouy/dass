@@ -24,6 +24,7 @@ FnResponse link_key_identity_map(const uint8_t *key, size_t length, uint64_t val
             } else {
                 statusExchanged = try_change_status(&identity_hashed_map[index].status, TX_ELEMENT_STAGED, TX_ELEMENT_LOCKED);
             }
+            TX_ELEMENT_STATUS status = get_status(&identity_hashed_map[index].status);
 
             if (statusExchanged != RES_STANDARD_TRUE)
             {
@@ -45,13 +46,15 @@ FnResponse link_key_identity_map(const uint8_t *key, size_t length, uint64_t val
             FnResponse add_action_response = add_action_transaction(id_transaction, IDENTITY_MAP_PROVIDER, &payload);
             if ( add_action_response != RES_STANDARD_SUCCESS ){
                 force_status(&identity_hashed_map[index].status, current_status);
-                return RES_SYS_ERR_TIMEOUT;
+                return add_action_response;
             }
 
-            FnResponse add_dependency_response = add_dependency_transaction(id_transaction, identity_hashed_map[index].current_transaction_id);
-            if ( add_dependency_response != RES_STANDARD_SUCCESS ){
-                force_status(&identity_hashed_map[index].status, current_status);
-                return RES_SYS_ERR_TIMEOUT;
+            if ( status == TX_ELEMENT_STAGED ) {
+                FnResponse add_dependency_response = add_dependency_transaction(id_transaction, identity_hashed_map[index].current_transaction_id);
+                if ( add_dependency_response != RES_STANDARD_SUCCESS ){
+                    force_status(&identity_hashed_map[index].status, current_status);
+                    return add_dependency_response;
+                }
             }
 
             identity_hashed_map[index].current_transaction_id = id_transaction;

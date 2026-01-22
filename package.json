@@ -1,7 +1,7 @@
 {
-    "name": "@befive/dec-atomic-shared",
+    "name": "@befive/dass",
     "version": "0.0.1",
-    "description": "A multi worker state with atomic locks",
+    "description": "A decentralized multi workers all in one application framework for JavaScript and TypeScript",
     "main": "dist/index.js",
     "types": "dist/types/index.d.ts",
     "files": [
@@ -10,5 +10,11 @@
     ],
     "scripts": {
         "bun:build": "bun build.ts"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    },
+    "peerDependencies": {
+        "typescript": "^5.9.3"
     }
 }

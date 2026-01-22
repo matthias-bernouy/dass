@@ -20,13 +20,13 @@ typedef enum {
 } TX_ELEMENT_STATUS;
 
 typedef enum{
-    TX_STATUS_STARTED           = 0,
-    TX_STATUS_WAITING           = 1,
-    TX_STATUS_ABORTED           = 2,
-    TX_STATUS_COMMITED          = 3,
-    TX_STATUS_LOCAL_PERSISTED   = 4,
-    TX_STATUS_GLOBAL_PERSISTED  = 5,
-    TX_STATUS_FREE              = 6,
+    TX_STATUS_FREE              = 0,
+    TX_STATUS_STARTED           = 1,
+    TX_STATUS_WAITING           = 2,
+    TX_STATUS_ABORTED           = 3,
+    TX_STATUS_COMMITED          = 4,
+    TX_STATUS_LOCAL_PERSISTED   = 5,
+    TX_STATUS_GLOBAL_PERSISTED  = 6,
 } TX_STATUS;
 
 typedef enum{
