@@ -44,6 +44,8 @@ typedef enum {
 	RES_TX_TRANSACTION_NOT_ACTIVE                   = 300020,
 	RES_TX_STATUS_ERROR							    = 300021,
 
+	RES_TX_ADD_DEPENDENCY_FULL                      = 300030,
+
 	// IdentityMap Responses ( 400 000 to 499 999 )
 	RES_IDENTITY_MAP_SLOT_EQUALS		= 400001,
 	RES_IDENTITY_MAP_SLOT_AVAILABLE		= 400002,

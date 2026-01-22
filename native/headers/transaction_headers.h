@@ -2,6 +2,7 @@
 #define TRANSACTION_SYSTEM_H
 
 #include "./shared_headers.h"
+#include "./thread_headers.h"
 
 // CONSTANTS
 #define MAX_TRANSACTIONS (1 << 16)

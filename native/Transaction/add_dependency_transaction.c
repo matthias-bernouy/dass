@@ -13,7 +13,7 @@ FnResponse add_dependency_transaction(uint64_t my_id, uint64_t owner_id)
         {
             atomic_fetch_sub_explicit(&tx->depends_on_counter, 1, memory_order_acq_rel);
             atomic_fetch_sub_explicit(&tx_target->dependencies_of_counter, 1, memory_order_acq_rel);
-            return RES_SYS_ERR_FULL;
+            return RES_TX_ADD_DEPENDENCY_FULL;
         }
         tx->depends_on[my_tx_dep_index] = owner_id;
         tx_target->dependencies_of[tx_target_dep_index] = my_id;
