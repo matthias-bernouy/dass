@@ -7,5 +7,5 @@ FnResponse try_change_status(_Atomic uint64_t * data, uint64_t expected, uint64_
         &expected,
         desired,
         memory_order_acq_rel,
-        memory_order_relaxed);
+        memory_order_relaxed) ? RES_STANDARD_TRUE : RES_STANDARD_FALSE;
 }

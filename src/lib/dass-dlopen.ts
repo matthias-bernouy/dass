@@ -7,12 +7,12 @@ export const { symbols } = dlopen(path, {
     // Identity map management
     link_key_identity_map: {
         args: [FFIType.ptr, FFIType.u64, FFIType.u64, FFIType.u64],
-        returns: FFIType.u64,
+        returns: FFIType.u32,
     },
 
     key_exists_identity_map: {
         args: [FFIType.ptr, FFIType.u64],
-        returns: FFIType.u64,
+        returns: FFIType.u32,
     },
 
     // Transaction management
@@ -23,7 +23,7 @@ export const { symbols } = dlopen(path, {
 
     commit_transaction: {
         args: [FFIType.u64],
-        returns: FFIType.u64,
+        returns: FFIType.u32,
     },
 
     // abort_transaction: {

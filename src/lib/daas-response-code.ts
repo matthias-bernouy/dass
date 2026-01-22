@@ -10,19 +10,18 @@ export const DaasResponseCode: Record<number, string> = {
     300011: "Transaction status error",
 }
 
-export function processIdentifierResponse(code: bigint): BigInt {
+export function processIdentifierResponse(code: bigint): bigint {
     const numCode = Number(code);
     if ( numCode > 1000 ) return code;
     const message = DaasResponseCode[numCode] || "Unknown error code";
     throw new Error(`DAAS Error ${numCode}: ${message}`);
 }
 
-export function processResponse(code: bigint): boolean {
-    const numCode = Number(code);
-    if ( numCode === 3 ) return false
-    if ( numCode === 4 ) return true
-    if ( numCode === 100001 ) return true
-    if ( numCode === 100002 ) return false
-    const message = DaasResponseCode[numCode] || "Unknown error code";
-    throw new Error(`DAAS Error ${numCode}: ${message}`);
+export function processResponse(code: number): boolean {
+    if ( code === 3 ) return false
+    if ( code === 4 ) return true
+    if ( code === 100001 ) return true
+    if ( code === 100002 ) return false
+    const message = DaasResponseCode[code] || "Unknown error code";
+    throw new Error(`DAAS Error ${code}: ${message}`);
 }

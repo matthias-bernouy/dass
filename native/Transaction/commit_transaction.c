@@ -4,7 +4,7 @@ FnResponse commit_transaction(uint64_t transaction_id)
 {
     // Get the transaction.
     Transaction *tx = get_transaction(transaction_id);
-    if (tx == NULL) return RES_TX_NO_TRANSACTION_FOUND;
+    if (tx == NULL) return RES_TX_NO_TRANSACTION_FOUND_IN_START_OF_COMMIT;
 
     // Set to waiting.
     if (is_status(&tx->status, TX_STATUS_STARTED)) {
@@ -67,8 +67,9 @@ FnResponse commit_transaction(uint64_t transaction_id)
     tx->checksum = hash;
 
     // Set to commited.
-    bool ok = try_change_status(&tx->status, TX_STATUS_WAITING, TX_STATUS_COMMITED);
-    if (!ok) return RES_SYS_ERR_CORRUPTED;
+
+    // To change when disk persistence is added.
+    force_status(&tx->status, TX_STATUS_FREE);
 
     return RES_STANDARD_SUCCESS;
 }

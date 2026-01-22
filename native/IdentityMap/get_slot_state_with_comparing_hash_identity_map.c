@@ -19,7 +19,7 @@ FnResponse get_slot_state_with_comparing_hash_identity_map(const uint32_t index,
             if (timestamp == 0x000000000000000){
                 timestamp = timestamp_to_compare;
             }
-            if (timestamp_to_compare - timestamp > 1000000ULL){
+            if (timestamp_to_compare - timestamp > 1000000000ULL){
                 return RES_IDENTITY_MAP_SLOT_TIMEOUT;
             }
             max_iterations++;

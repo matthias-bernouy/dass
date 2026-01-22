@@ -3,10 +3,6 @@
 
 typedef enum {
 
-	// Standard for boolean values
-	RES_STANDARD_FALSE = 0,
-	RES_STANDARD_TRUE  = 1,
-
 	// Identifiers ERRORS ( 0 to 999 )
 	RES_IDENTIFIER_EMPTY     = 0,
 	RES_IDENTIFIER_ERROR     = 1,
@@ -18,6 +14,8 @@ typedef enum {
 	// Standard Responses ( 100 000 to 199 999 )
     RES_STANDARD_SUCCESS        = 100001,
     RES_STANDARD_FAILED         = 100002,
+	RES_STANDARD_FALSE          = 100003,
+	RES_STANDARD_TRUE           = 100004,
 
 	// System Standards Responses ( 200 000 to 299 999 )
     RES_SYS_ERR_FULL          = 200001,
@@ -39,9 +37,12 @@ typedef enum {
     RES_TX_RESPONSE_AN_OTHER_COMMIT_TAKE_THE_LOCK   = 300007,
     RES_TX_RESPONSE_DEPENDENCY_REJECTED             = 300008,
 
-	RES_TX_NO_TRANSACTION_FOUND                     = 300009,
-	RES_TX_TRANSACTION_NOT_ACTIVE                   = 300010,
-	RES_TX_STATUS_ERROR							    = 300011,
+	RES_TX_NO_TRANSACTION_FOUND                           = 300010,
+	RES_TX_NO_TRANSACTION_FOUND_IN_ADD_ACTION_TRANSACTION = 300011,
+	RES_TX_NO_TRANSACTION_FOUND_IN_START_OF_COMMIT		  = 300012,
+
+	RES_TX_TRANSACTION_NOT_ACTIVE                   = 300020,
+	RES_TX_STATUS_ERROR							    = 300021,
 
 	// IdentityMap Responses ( 400 000 to 499 999 )
 	RES_IDENTITY_MAP_SLOT_EQUALS		= 400001,
@@ -50,7 +51,6 @@ typedef enum {
 	RES_IDENTITY_MAP_SLOT_USED			= 400004,
 	RES_IDENTITY_MAP_SLOT_TIMEOUT		= 400005,
 
-	_FORCE_U64 = 0xFFFFFFFFFFFFFFFFULL
 } FnResponse;
 
 

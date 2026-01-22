@@ -8,7 +8,7 @@ FnResponse add_action_transaction(uint64_t transaction_id, uint32_t action_provi
 
     Transaction *transaction = get_transaction(transaction_id);
     if (transaction == NULL)
-        return RES_TX_NO_TRANSACTION_FOUND;
+        return RES_TX_NO_TRANSACTION_FOUND_IN_ADD_ACTION_TRANSACTION;
     if (!is_status(&transaction->status, TX_STATUS_STARTED))
         return RES_TX_TRANSACTION_NOT_ACTIVE;
     uint32_t action_index = atomic_fetch_add_explicit(&transaction->action_counter, 1, memory_order_acq_rel);
