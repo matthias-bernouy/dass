@@ -50,5 +50,3 @@ Then, build the project with
 Then, you can start the project, which is a multi workers multi location, so if you have a 32 cpus server, 32 threads works together.
 If your app is growing, you can add additionnals servers with our decentralized systems.
 ```IN PROGRESS```
-
-- 
