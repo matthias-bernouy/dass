@@ -25,6 +25,7 @@ typedef struct
 {
     uint64_t old_heap_cursor;
     uint64_t new_heap_cursor;
+    uint64_t dep_tx_id;
     atomic_element_t* target;
 } TxOperation;
 
