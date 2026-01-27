@@ -1,0 +1,35 @@
+#ifndef HEAP_H
+#define HEAP_H
+
+#include "shared.h"
+
+#define BASE_HEAP_SIZE_SHIFT 32 // 2^32 = 4 GB
+#define BASE_RESERVATION_PER_THREAD_SHIFT 24 // 2^24 = 16 MB
+
+#define BASE_HEAP_SIZE (1ULL << BASE_HEAP_SIZE_SHIFT)
+#define BASE_RESERVATION_PER_THREAD (1ULL << BASE_RESERVATION_PER_THREAD_SHIFT)
+
+typedef struct {
+    uint8_t status;
+    uint32_t length;
+    uint8_t data[];
+} heap_element;
+
+// Global Variables
+extern uint8_t          heap[BASE_HEAP_SIZE];
+extern _Atomic uint64_t heap_cursor;
+extern uint64_t         heap_size;
+
+// Thread Global variables
+extern _Thread_local uint64_t thread_reservation_cursor;
+extern _Thread_local uint64_t thread_reservation_limit;
+
+// Internal Functions
+void reservation_heap();
+
+// Exposed Functions
+uint64_t              write_heap(void* data, uint64_t length);
+void                  free_heap(uint64_t cursor);
+const heap_element*   read_heap(uint64_t cursor);
+
+#endif

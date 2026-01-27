@@ -12,6 +12,12 @@ export class IdentityMap {
         return processResponse(res);
     }
 
+    static unlink(key: any, tx_id: bigint) {
+        const buffer = Buffer.from(key);
+        const res = symbols.unlink_key_identity_map(ptr(buffer), buffer.length, tx_id);
+        return processResponse(res);
+    }
+
     static exists(key: any): boolean {
         const buffer = Buffer.from(key);
         const res = symbols.key_exists_identity_map(ptr(buffer), buffer.length);

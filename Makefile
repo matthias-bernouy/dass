@@ -2,7 +2,8 @@
 NAME = libnative.so
 
 # Répertoires
-SRC_DIR = native
+SRC_DIR = native/src
+HEADERS_DIR = native/headers
 BUILD_DIR = build
 
 # 1. Lister tous les fichiers .c
@@ -12,7 +13,8 @@ SOURCES = $(shell find $(SRC_DIR) -name "*.c")
 CC = gcc
 # -fPIC est obligatoire pour les .so
 # -shared indique qu'on veut une bibliothèque partagée
-CFLAGS = -O3 -Wall -Wextra -fPIC -shared -march=native -I$(SRC_DIR)
+INCLUDES = -I$(shell pwd)/$(HEADERS_DIR) -I$(shell pwd)/$(SRC_DIR)
+CFLAGS = -O3 -Wall -Wextra -fPIC -shared -march=native $(INCLUDES)
 
 # Règle par défaut
 all: $(BUILD_DIR)/$(NAME)
