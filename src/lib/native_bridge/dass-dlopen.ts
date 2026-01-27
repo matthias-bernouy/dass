@@ -1,6 +1,7 @@
 import { dlopen, FFIType, ptr } from "bun:ffi";
+import { join } from "path";
 
-const path = "./build/libnative.so";
+const path = join(__dirname, "build/generated.so");
 
 export const { symbols } = dlopen(path, {
 

@@ -1,5 +1,5 @@
-import { IdentityMap } from "./lib/daas-identity-map";
-import { Transaction } from "./lib/dass-transaction";
+import { IdentityMap } from "./lib/native_bridge/daas-identity-map";
+import { Transaction } from "./lib/native_bridge/dass-transaction";
 
 console.log(IdentityMap.exists("exampleKey"));
 

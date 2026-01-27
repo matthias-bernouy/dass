@@ -6,33 +6,32 @@ This folder includes the C project.
 For each parts, a folder is assigned.
 A file include only one function under this folder.
 Example : 
-	-> Transaction/commit_transaction.c
-	-> Transaction/create_transaction.c
+	-> tx/commit_tx.c
+	-> tx/create_tx.c
 
 ## 1.2 native/headers/
-For each parts, a header is assigned.
+For each parts, a header is created.
 Exemple : 
-	-> Headers/transaction.h
-	-> Headers/identity_map.h
+	-> headers/tx.h
+	-> headers/idmap.h
 Additionnal files :
-	-> Headers/function_responses.h
+	-> headers/responses.h
 
 ## 1.3 Folder names
-Folder should be named using CamelCase
+Folder should be named using snake_case
 
 ## 1.4 File names
 File names should be equal to the unique function in the file.
 
 ## 1.5 Function names
-The function should be named using snakeCase
+The function should be named using snake_case
 The function should include the parts.
 Ex :
 	NO  commit()
-	YES commit_transaction()
+	YES commit_tx()
 
 # 1.6 Variables names
-Variables should be named using snakeCase
-
+Variables should be named using snake_case
 
 # 2. src/
 

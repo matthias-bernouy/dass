@@ -1,6 +1,6 @@
 import { exit } from "process";
-import { IdentityMap } from "src/lib/daas-identity-map";
-import { Transaction } from "src/lib/dass-transaction";
+import { IdentityMap } from "src/lib/native_bridge/daas-identity-map";
+import { Transaction } from "src/lib/native_bridge/dass-transaction";
 
 import { workerData, parentPort } from "worker_threads";
 

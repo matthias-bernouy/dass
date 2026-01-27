@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
-import { IdentityMap } from "src/lib/daas-identity-map";
-import { Transaction } from "src/lib/dass-transaction";
+import { IdentityMap } from "src/lib/native_bridge/daas-identity-map";
+import { Transaction } from "src/lib/native_bridge/dass-transaction";
 import { Worker } from "worker_threads"
 
 test("performance test placeholder", async () => {

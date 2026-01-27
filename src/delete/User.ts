@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY
 
-import { AtomicSharedIdentitymap } from "../lib/daas-identity-map";
+import { AtomicSharedIdentitymap } from "../lib/native_bridge/daas-identity-map";
 
 export class User {
 

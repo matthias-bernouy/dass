@@ -4,7 +4,7 @@ NAME = libnative.so
 # Répertoires
 SRC_DIR = native/src
 HEADERS_DIR = native/headers
-BUILD_DIR = build
+BUILD_DIR = src/lib/native_bridge/build
 
 # 1. Lister tous les fichiers .c
 SOURCES = $(shell find $(SRC_DIR) -name "*.c")
