@@ -41,7 +41,7 @@ typedef struct
 
 typedef atomic_element_t TxMap;
 
-extern _Atomic uint64_t global_transaction_counter;
+extern _Atomic uint64_t tx_counter;
 extern TxMap tx_map[MAX_TX];
 
 uint64_t      create_tx();
