@@ -5,17 +5,17 @@ const path = "./build/libnative.so";
 export const { symbols } = dlopen(path, {
 
     // Identity map management
-    link_key_identity_map: {
+    link_idmap: {
         args: [FFIType.ptr, FFIType.u64, FFIType.u64, FFIType.u64],
         returns: FFIType.u32,
     },
 
-    unlink_key_identity_map: {
+    unlink_idmap: {
         args: [FFIType.ptr, FFIType.u64, FFIType.u64],
         returns: FFIType.u32,
     },
 
-    key_exists_identity_map: {
+    exists_idmap: {
         args: [FFIType.ptr, FFIType.u64],
         returns: FFIType.u32,
     }

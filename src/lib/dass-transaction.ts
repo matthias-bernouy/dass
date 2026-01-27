@@ -1,4 +1,4 @@
-import { processIdentifierResponse, processResponse } from "./daas-response-code";
+import { processIdentifierResponse, processResponse } from "./daas-response-fn";
 import { symbols } from "./dass-dlopen";
 
 export class Transaction {

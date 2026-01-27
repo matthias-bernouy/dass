@@ -1,6 +1,6 @@
 #include "heap.h"
 
-uint8_t heap_memory[BASE_HEAP_SIZE];
+uint8_t heap[BASE_HEAP_SIZE];
 _Atomic uint64_t heap_cursor = 1001;
 uint64_t heap_size = (BASE_HEAP_SIZE);
 

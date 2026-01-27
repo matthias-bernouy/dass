@@ -1,14 +1,4 @@
-export const DaasResponseCode: Record<number, string> = {
-
-    3: "Not Found",
-    4: "Found",
-
-    100001: "Success",
-
-    300009: "No transaction found",
-    300010: "Transaction not active",
-    300011: "Transaction status error",
-}
+import { DaasResponseCode } from "./daas-responses";
 
 export function processIdentifierResponse(code: bigint): bigint {
     const numCode = Number(code);
