@@ -1,6 +1,6 @@
 #include "tx.h"
 
-// FnResponse add_action_transaction(uint64_t transaction_id, uint32_t action_provider, PayloadTransaction *payload)
+// FnResponse add_operation_tx(uint64_t old_cursor, uint64_t new_cursor, atomic_element_t* target, uint64_t tx_id, uint64_t dep_tx_id)
 // {
 //     // TODO: Need to free the data after resetting the transaction
 //     void* persistent_data = malloc(payload->size);

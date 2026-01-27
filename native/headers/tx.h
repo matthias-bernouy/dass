@@ -2,28 +2,15 @@
 #define TX_H
 
 #include "shared.h"
+#include "lockable.h"
+#include "heap.h"
 
 // CONSTANTS
-#define MAX_TRANSACTIONS (1 << 16)
-#define TRANSACTION_MODULO_MASK (MAX_TRANSACTIONS - 1)
-#define TRANSACTION_TIMEOUT_NS (5ULL * 60ULL * 1000000000ULL)
+#define MAX_TX (1 << 16)
+#define MAX_TX_MASK (MAX_TX - 1)
 
-#define TRANSACTION_MAX_ACTIONS (1 << 7)
+#define MAX_OPERATIONS_TX (1 << 8)
 
-#define TRANSACTION_MAX_HANDLER (1 << 8)
-#define TRANSACTION_MAX_DEPENDENCIES (1 << 8)
-
-#define THREAD_TRANSACTION_BATCH_SIZE 512
-
-extern _Thread_local uint64_t tx_id_cursor;
-extern _Thread_local uint64_t tx_id_limit;
-
-typedef enum {
-    TX_ELEMENT_NO_CONCURRENCY = 0,
-    TX_ELEMENT_LOCKED         = 1,
-    TX_ELEMENT_STAGED         = 2,
-} TX_ELEMENT_STATUS;
-    
 typedef enum{
     TX_STATUS_FREE              = 0,
     TX_STATUS_STARTED           = 1,
@@ -31,54 +18,37 @@ typedef enum{
     TX_STATUS_ABORTED           = 3,
     TX_STATUS_COMMITED          = 4,
     TX_STATUS_LOCAL_PERSISTED   = 5,
-    TX_STATUS_GLOBAL_PERSISTED  = 6,
     TX_STATUS_RESTORE           = 7,
 } TX_STATUS;
 
-typedef enum{
-    IDENTITY_MAP_PROVIDER = 1
-} PROVIDER_ACTION_TRANSACTION;
-
-// STRUCTURES
 typedef struct
 {
-    uint32_t type; 
-    uint32_t size;
-    void *target;
-    void *data;
-} PayloadTransaction;
+    uint64_t old_heap_cursor;
+    uint64_t new_heap_cursor;
+    atomic_element_t* target;
+} TxOperation;
 
 typedef struct
 {
-    uint64_t transaction_id;
-    _Atomic uint64_t status;
-    uint64_t timestamp;
+    uint64_t  tx_id;
+    TX_STATUS status;
 
-    _Atomic uint64_t action_counter;
-    _Atomic uint64_t dependencies_of_counter;
-    _Atomic uint64_t depends_on_counter;
-    uint32_t checksum;               
-    PayloadTransaction actions[TRANSACTION_MAX_ACTIONS];
-    uint64_t dependencies_of[TRANSACTION_MAX_ACTIONS];
-    uint64_t depends_on[TRANSACTION_MAX_ACTIONS];
-} Transaction;
+    uint32_t  operation_counter;
+    TxOperation operations[MAX_OPERATIONS_TX];
 
-typedef struct
-{
-    uint64_t transaction_id;
-    uint32_t _padding;
-    Transaction ptr;
-} MapTransactionEntry;
+    uint32_t  checksum;
+} Tx;
 
-extern _Atomic uint64_t global_handler_counter;
+typedef atomic_element_t TxMap;
+
 extern _Atomic uint64_t global_transaction_counter;
-extern MapTransactionEntry transaction_map[MAX_TRANSACTIONS];
+extern TxMap tx_map[MAX_TX];
 
 uint64_t      create_tx();
-Transaction*  get_tx(uint64_t transaction_id);
-FnResponse    add_action_tx(uint64_t transaction_id, uint32_t action_provider, PayloadTransaction *payload);
+Tx*           get_tx(uint64_t transaction_id);
+FnResponse    add_operation_tx(uint64_t old_cursor, uint64_t new_cursor, atomic_element_t* target, uint64_t tx_id, uint64_t dep_tx_id);
 FnResponse    commit_tx(uint64_t transaction_id);
-FnResponse    add_dep_tx(uint64_t my_id, uint64_t owner_id);
-void          reset_tx(Transaction *transaction);
+void          reset_tx(Tx *transaction);
+void          persist_tx(Tx *transaction);
 
 #endif
