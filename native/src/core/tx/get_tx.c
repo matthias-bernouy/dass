@@ -1,6 +1,6 @@
 #include "tx.h"
 
-Tx* get_transaction(uint64_t tx_id)
+Tx* get_tx(uint64_t tx_id)
 {
     atomic_element_t* element = &tx_map[tx_id & MAX_TX_MASK];
     MetadataConcurrencyElement meta = wait_metadata_lockable(element);

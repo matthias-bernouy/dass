@@ -48,8 +48,9 @@ extern TxMap tx_map[MAX_TX];
 uint64_t      create_tx();
 Tx*           get_tx(uint64_t transaction_id);
 FnResponse    add_operation_tx(uint64_t old_cursor, uint64_t new_cursor, atomic_element_t* target, uint64_t tx_id, uint64_t dep_tx_id);
+FnResponse    abort_operations_tx(TxOperation* operations, uint32_t operation_count);
 FnResponse    commit_tx(uint64_t transaction_id);
-void          reset_tx(Tx *transaction);
-void          persist_tx(Tx *transaction);
+FnResponse    abort_tx(uint64_t transaction_id);
+// void          persist_tx(Tx *transaction);
 
 #endif

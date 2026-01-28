@@ -15,7 +15,7 @@ FnResponse commit_tx(uint64_t tx_id)
 
     for (uint32_t i = 0; i < tx->operation_counter; i++) {
         TxOperation* operation = &tx->operations[i];
-        Tx* tx_dep = get_tx(tx_id);
+        Tx* tx_dep = get_tx(operation->dep_tx_id);
         if (tx_dep == NULL) {
             free_lockable(element);
             return RES_TX_NO_TRANSACTION_FOUND;
@@ -26,11 +26,12 @@ FnResponse commit_tx(uint64_t tx_id)
         }
         if (tx_dep->status == TX_STATUS_ABORTED) {
             tx->status = TX_STATUS_ABORTED;
-            // call aborted function
             free_lockable(element);
             return RES_TX_RESPONSE_ABORTED;
         }
     }
+
+    abort_operations_tx(&tx->operations, tx->operation_counter);
 
     tx->status = TX_STATUS_COMMITED;
     free_lockable(element);
