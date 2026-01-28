@@ -10,6 +10,11 @@
 #define BASE_HEAP_SIZE (1ULL << BASE_HEAP_SIZE_SHIFT)
 #define BASE_RESERVATION_PER_THREAD (1ULL << BASE_RESERVATION_PER_THREAD_SHIFT)
 
+typedef enum {
+    HEAP_STATUS_FREE    = 0,
+    HEAP_STATUS_USED    = 1
+} HEAP_STATUS;
+
 typedef struct {
     uint8_t status;
     uint32_t length;
@@ -29,8 +34,8 @@ extern _Thread_local uint64_t thread_reservation_limit;
 void reservation_heap();
 
 // Exposed Functions
-uint64_t              write_heap(void* data, uint32_t length);
+uint64_t        write_heap(void* data, uint32_t length);
 void                  free_heap(uint64_t cursor);
-const heap_element*   read_heap(uint64_t cursor);
+const void*           get_ptr_heap(uint64_t cursor);
 
 #endif

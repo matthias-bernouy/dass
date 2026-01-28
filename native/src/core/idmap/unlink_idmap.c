@@ -3,52 +3,52 @@
 FnResponse unlink_idmap(const uint8_t *key, size_t length, uint64_t tx_id)
 {
     uint64_t h = xxh32_fixed(key, length, 0);
-    uint32_t start_index = (uint32_t)(h & ID_MAP_MASK);
-    uint32_t current_index = start_index;
+    uint32_t index = (uint32_t)(h & ID_MAP_MASK);
+    uint64_t tries = 0;
 
-    while (1)
+    while (tries++ < CONCURRENCY_MAX_TRIES)
     {
-        lockable_element_t* element = &identity_map[current_index];
+        uint64_t dep_tx_id = IDENTIFIER_EMPTY;
 
-        MetadataConcurrencyElement meta_start     = wait_metadata_lockable(element);
-        const heap_element*        heap_element   = read_heap(meta_start.cursor);
-        const IdentityMapElement*  element_data   = (const IdentityMapElement*)heap_element->data;
+        lockable_element_t* element = &identity_map[index];
+        const IdentityMapElement* element_start = (const IdentityMapElement*) get_lockable(element);
 
-        FnResponse slot_state = slot_state_idmap(element_data, h);
-        if (slot_state == RES_IDENTITY_MAP_SLOT_AVAILABLE) return RES_IDENTIFIER_NOT_FOUND;
-        if (slot_state == RES_IDENTITY_MAP_SLOT_TIMEOUT) return RES_SYS_ERR_TIMEOUT;
-        if (slot_state == RES_IDENTITY_MAP_SLOT_USED) {
-            current_index = (current_index + 1) & ID_MAP_MASK;
-            continue;
+        if ( element_start != NULL ) {
+            dep_tx_id = element_start->transaction_id;
+            FnResponse slot_state = slot_state_idmap(element_start, h);
+            if (slot_state == RES_IDENTITY_MAP_SLOT_AVAILABLE) return RES_IDENTIFIER_NOT_FOUND;
+            if (slot_state == RES_IDENTITY_MAP_SLOT_TIMEOUT) return RES_SYS_ERR_TIMEOUT;
+            if (slot_state == RES_IDENTITY_MAP_SLOT_USED) {
+                index = (index + 1) & ID_MAP_MASK;
+                continue;
+            }
         }
-        bool res = try_lock_lockable(element);
-        if ( !res ) continue;
 
-        MetadataConcurrencyElement meta_end = metadata_lockable(element);
-        if ( meta_start.cursor != meta_end.cursor ) {
+        const IdentityMapElement* element_end = (const IdentityMapElement*) try_get_and_lock_lockable(element);
+
+        if ( element_start != element_end ) {
             free_lockable(element);
+            _mm_pause();
             continue;
         }
 
         IdentityMapElement new_data = {
-            .hash = 0x0000000000000000ULL,
-            .value = 0x0000000000000000ULL,
+            .hash = 0X0000000000000000,
+            .value = 0X0000000000000000,
             .transaction_id = tx_id,
             .status = ID_MAP_ELEMENT_DELETED
         };
 
-        uint64_t new_cursor = write_heap(&new_data, sizeof(IdentityMapElement));
-        if (new_cursor == RES_WRITE_MEMORY_ERROR) {
+        FnResponse res = safe_total_update_lockable(element, &new_data, sizeof(IdentityMapElement), tx_id, dep_tx_id);
+        assert(res);
+
+        if ( !res ) {
             free_lockable(element);
-            return RES_WRITE_MEMORY_ERROR;
+            return res;
         }
-
-        add_operation_tx(meta_end.cursor, new_cursor, element, tx_id, element_data->transaction_id);
-
-        free_update_lockable(element, new_cursor);
-
-        return RES_STANDARD_TRUE;
-
+    
+        return true;
     }
+
     return RES_SYS_ERR_MAX_ITERATION;
 }

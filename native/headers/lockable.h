@@ -19,6 +19,11 @@ typedef enum {
 } CONCURRENCY_STATUS;
 
 typedef struct {
+    uint64_t old_cursor;
+    uint64_t new_cursor;
+} LockableChangeElement;
+
+typedef struct {
     uint64_t cursor;
     CONCURRENCY_STATUS status;
 } MetadataConcurrencyElement;
@@ -26,15 +31,18 @@ typedef struct {
 typedef _Atomic uint64_t lockable_element_t;
 
 // Internal Functions
-
-
-// Exposed Functions
+bool try_lock_lockable(lockable_element_t *actual_element);
+uint64_t pack_lockable(uint64_t cursor, uint8_t status);
 MetadataConcurrencyElement wait_metadata_lockable(lockable_element_t* val);
 MetadataConcurrencyElement metadata_lockable(lockable_element_t* val);
-uint64_t pack_lockable(uint64_t cursor, uint8_t status);
-bool free_update_lockable(lockable_element_t *actual_element, uint64_t cursor);
-bool free_lockable(lockable_element_t *actual_element);
-bool try_lock_lockable(lockable_element_t *actual_element);
 
+// Exposed Functions
+FnResponse safe_total_update_lockable(lockable_element_t *actual_element, void* data, uint32_t length, uint64_t tx_id, uint64_t dep_tx_id);
+bool free_lockable(lockable_element_t *actual_element);
+bool free_update_lockable(lockable_element_t *element, void* data, uint32_t length);
+bool free_update_cursor_lockable(lockable_element_t *element, uint64_t cursor);
+
+const void* get_lockable(lockable_element_t *ele);
+const void* try_get_and_lock_lockable(lockable_element_t *ele);
 
 #endif

@@ -3,5 +3,5 @@
 
 // __attribute__((constructor))
 // void main(){
-//     printf("Shared library initialized.\n");
+//     return 0;
 // }

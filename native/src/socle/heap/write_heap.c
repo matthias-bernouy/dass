@@ -12,7 +12,7 @@ uint64_t write_heap(void* data, uint32_t length)
 
     uint64_t cursor = thread_reservation_cursor;
     heap_element* element = (heap_element*)&heap[cursor];
-    element->status = 1;
+    element->status = HEAP_STATUS_USED;
     element->length = length;
     memcpy(element->data, data, length);
 

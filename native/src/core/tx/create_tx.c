@@ -12,7 +12,7 @@ uint64_t create_tx()
 
         MetadataConcurrencyElement meta = metadata_lockable(element);
         if (meta.cursor != 0) {
-            Tx* existing_tx = (Tx*)read_heap(meta.cursor)->data;
+            Tx* existing_tx = (Tx*)get_ptr_heap(meta.cursor);
             if (existing_tx->status != TX_STATUS_FREE) {
                 free_lockable(element);
                 continue;
@@ -29,14 +29,7 @@ uint64_t create_tx()
                 .operation_counter = 0,
                 .checksum = 0
             };
-
-            uint64_t new_cursor = write_heap(&new_tx, sizeof(Tx));
-            if ( is_id_error(new_cursor) ) {
-                free_lockable(element);
-                continue;
-            }
-
-            free_update_lockable(element, new_cursor);
+            free_update_lockable(element, &new_tx, sizeof(Tx));
         }
 
         return index;

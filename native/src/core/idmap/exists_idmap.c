@@ -4,15 +4,12 @@ FnResponse exists_idmap(const uint8_t *key, size_t length)
 {
     uint64_t h = xxh32_fixed(key, length, 0);
     uint32_t index = (uint32_t)(h & ID_MAP_MASK);
-    uint32_t max_iterations = 500;
+    uint32_t tries = 0;
 
-    while (max_iterations--)
+    while (tries++ < CONCURRENCY_MAX_TRIES)
     {
         lockable_element_t* element = &identity_map[index];
-
-        MetadataConcurrencyElement meta_start     = wait_metadata_lockable(element);
-        const heap_element*        heap_element   = read_heap(meta_start.cursor);
-        const IdentityMapElement*  element_data   = (const IdentityMapElement*)heap_element->data;
+        const IdentityMapElement*  element_data   = (const IdentityMapElement*)get_lockable(element);
 
         FnResponse slot_state = slot_state_idmap(element_data, h);
 
@@ -26,5 +23,5 @@ FnResponse exists_idmap(const uint8_t *key, size_t length)
             return RES_SYS_ERR_TIMEOUT;
         }
     }
-    return RES_SYS_ERR_TIMEOUT;
+    return RES_SYS_ERR_MAX_ITERATION;
 }
