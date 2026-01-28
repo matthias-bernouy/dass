@@ -19,23 +19,23 @@ export const { symbols } = dlopen(path, {
     exists_idmap: {
         args: [FFIType.ptr, FFIType.u64],
         returns: FFIType.u32,
-    }
+    },
 
     // Transaction management
-    // create_transaction: {
-    //     args: [],
-    //     returns: FFIType.u64,
-    // },
+    create_tx: {
+        args: [],
+        returns: FFIType.u64,
+    },
 
-    // commit_transaction: {
-    //     args: [FFIType.u64],
-    //     returns: FFIType.u32,
-    // },
+    commit_tx: {
+        args: [FFIType.u64],
+        returns: FFIType.u32,
+    },
 
-    // abort_transaction: {
-    //     args: [FFIType.u64],
-    //     returns: FFIType.u64,
-    // }
+    abort_tx: {
+        args: [FFIType.u64],
+        returns: FFIType.u32,
+    }
 
 });
 

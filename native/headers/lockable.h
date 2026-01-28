@@ -2,10 +2,14 @@
 #define LOCKABLE_H
 
 #include "shared.h"
+#include "errors.h"
 
-#define STATUS_MASK 0xFF00000000000000
-#define CURSOR_MASK 0x00FFFFFFFFFFFFFF
-#define STATUS_SHIFT 56
+// 48 bits pour le curseur (256 To max)
+#define CURSOR_MASK  0x0000FFFFFFFFFFFFULL 
+
+// 16 bits pour le statut (situés tout en haut)
+#define STATUS_MASK  0xFFFF000000000000ULL
+#define STATUS_SHIFT 48
 
 #define CONCURRENCY_MAX_TRIES 1000
 
@@ -28,8 +32,8 @@ typedef _Atomic uint64_t atomic_element_t;
 MetadataConcurrencyElement wait_metadata_lockable(atomic_element_t* val);
 MetadataConcurrencyElement metadata_lockable(atomic_element_t* val);
 uint64_t pack_lockable(uint64_t cursor, uint8_t status);
-void free_update_lockable(atomic_element_t *actual_element, uint64_t cursor);
-void free_lockable(atomic_element_t *actual_element);
+bool free_update_lockable(atomic_element_t *actual_element, uint64_t cursor);
+bool free_lockable(atomic_element_t *actual_element);
 bool try_lock_lockable(atomic_element_t *actual_element);
 bool equals_lockable(MetadataConcurrencyElement metadata1, MetadataConcurrencyElement metadata2);
 

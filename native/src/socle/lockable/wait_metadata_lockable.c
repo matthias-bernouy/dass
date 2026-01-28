@@ -10,7 +10,8 @@ MetadataConcurrencyElement wait_metadata_lockable(atomic_element_t* val)
     uint64_t loaded_val;
     uint32_t try_count = 0;
     MetadataConcurrencyElement metadata;
-    while (1) {
+
+    retry:
         loaded_val = atomic_load_explicit(val, memory_order_acquire);
         metadata.cursor = loaded_val & CURSOR_MASK;
         metadata.status = (CONCURRENCY_STATUS)(loaded_val >> STATUS_SHIFT);
@@ -18,9 +19,8 @@ MetadataConcurrencyElement wait_metadata_lockable(atomic_element_t* val)
             return metadata;
         }
         if (++try_count > CONCURRENCY_MAX_TRIES) {
-            break; 
+            return metadata;
         }
-        _mm_pause(); 
-    }
-    return metadata;
+        goto retry;
+    
 }

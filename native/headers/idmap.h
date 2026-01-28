@@ -5,6 +5,7 @@
 #include "tx.h"
 #include "lockable.h"
 #include "heap.h"
+#include "errors.h"
 
 #define ID_MAP_SIZE_SHIFT 24 // 16 642 177 entries
 #define ID_MAP_SIZE (1 << ID_MAP_SIZE_SHIFT)

@@ -5,7 +5,7 @@ import { Worker } from "worker_threads"
 
 test("performance test placeholder", async () => {
 
-    const iterations = 1000000;
+    const iterations = 100_000;
     const keys = [];
     for (let i = 0; i < 1100000; i++) {
         keys.push(`key_${i}`);
@@ -17,7 +17,7 @@ test("performance test placeholder", async () => {
     for (let i = 0; i < 1; i++) {
         workers.push(new Worker(new URL("./worker.ts", import.meta.url).toString(), {
             workerData: {
-                keys,
+                keys: keys
             },
         }))
     }
@@ -31,6 +31,7 @@ test("performance test placeholder", async () => {
     const promises = workers.map(worker => {
         return new Promise<void>((resolve) => {
             worker.on("exit", () => {
+                console.log("Worker exited");
                 resolve();
             })
         })

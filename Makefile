@@ -1,5 +1,5 @@
 # Nom de la bibliothèque finale
-NAME = libnative.so
+NAME = generated.so
 
 # Répertoires
 SRC_DIR = native/src

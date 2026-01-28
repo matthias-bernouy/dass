@@ -10,7 +10,7 @@ FnResponse abort_tx(uint64_t tx_id)
 
     tx->status = TX_STATUS_ABORTED;
 
-    abort_operations_tx(&tx->operations, tx->operation_counter);
+    abort_operations_tx(tx->operations, tx->operation_counter);
 
     free_lockable(element);
 

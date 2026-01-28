@@ -11,7 +11,12 @@
 #include <string.h>
 #include <sys/time.h>
 #include <time.h>
+#include <stdio.h>
+
 #include "responses.h"
+
+// Probably define macro for debug/release builds
+#include <assert.h>
 
  
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__)

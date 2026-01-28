@@ -1,6 +1,6 @@
 #include "idmap.h"
 
-FnResponse unlink_idmap(const uint8_t *key, size_t length, uint64_t id_transaction)
+FnResponse unlink_idmap(const uint8_t *key, size_t length, uint64_t tx_id)
 {
     uint64_t h = xxh32_fixed(key, length, 0);
     uint32_t start_index = (uint32_t)(h & ID_MAP_MASK);
@@ -33,7 +33,7 @@ FnResponse unlink_idmap(const uint8_t *key, size_t length, uint64_t id_transacti
         IdentityMapElement new_data = {
             .hash = 0x0000000000000000ULL,
             .value = 0x0000000000000000ULL,
-            .transaction_id = id_transaction,
+            .transaction_id = tx_id,
             .status = ID_MAP_ELEMENT_DELETED
         };
 
@@ -42,6 +42,8 @@ FnResponse unlink_idmap(const uint8_t *key, size_t length, uint64_t id_transacti
             free_lockable(element);
             return RES_WRITE_MEMORY_ERROR;
         }
+
+        add_operation_tx(meta_end.cursor, new_cursor, element, tx_id, element_data->transaction_id);
 
         free_update_lockable(element, new_cursor);
 

@@ -2,6 +2,7 @@
 #define HEAP_H
 
 #include "shared.h"
+#include "errors.h"
 
 #define BASE_HEAP_SIZE_SHIFT 32 // 2^32 = 4 GB
 #define BASE_RESERVATION_PER_THREAD_SHIFT 24 // 2^24 = 16 MB
@@ -28,8 +29,8 @@ extern _Thread_local uint64_t thread_reservation_limit;
 void reservation_heap();
 
 // Exposed Functions
-uint64_t              write_heap(void* data, uint64_t length);
-void                  free_heap(uint64_t cursor);
-const heap_element*   read_heap(uint64_t cursor);
+uint32_t              write_heap(void* data, uint32_t length);
+void                  free_heap(uint32_t cursor);
+const heap_element*   read_heap(uint32_t cursor);
 
 #endif

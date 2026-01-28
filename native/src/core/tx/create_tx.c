@@ -17,20 +17,27 @@ uint64_t create_tx()
                 free_lockable(element);
                 continue;
             }
+            existing_tx->status = TX_STATUS_STARTED;
+            existing_tx->tx_id = index;
+            existing_tx->operation_counter = 0;
+            existing_tx->checksum = 0;
+            free_lockable(element);
+        } else {
+            Tx new_tx = {
+                .tx_id = index,
+                .status = TX_STATUS_STARTED,
+                .operation_counter = 0,
+                .checksum = 0
+            };
+
+            uint64_t new_cursor = write_heap(&new_tx, sizeof(Tx));
+            if ( is_id_error(new_cursor) ) {
+                free_lockable(element);
+                continue;
+            }
+
+            free_update_lockable(element, new_cursor);
         }
-
-        Tx tx;
-        tx.status = TX_STATUS_STARTED;
-        tx.tx_id = index;
-        tx.operation_counter = 0;
-        tx.checksum = 0;
-
-        uint64_t cursor = write_heap(&tx, sizeof(Tx));
-        if (cursor == RES_WRITE_MEMORY_ERROR) {
-            return RES_WRITE_MEMORY_ERROR;
-        }
-
-        free_update_lockable(element, cursor);
 
         return index;
     }
