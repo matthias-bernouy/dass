@@ -8,7 +8,7 @@ FnResponse unlink_idmap(const uint8_t *key, size_t length, uint64_t tx_id)
 
     while (1)
     {
-        atomic_element_t* element = &identity_map[current_index];
+        lockable_element_t* element = &identity_map[current_index];
 
         MetadataConcurrencyElement meta_start     = wait_metadata_lockable(element);
         const heap_element*        heap_element   = read_heap(meta_start.cursor);

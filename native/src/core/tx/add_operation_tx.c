@@ -1,13 +1,13 @@
 #include "tx.h"
 
-FnResponse add_operation_tx(uint32_t old_cursor, uint32_t new_cursor, atomic_element_t* target, uint64_t tx_id, uint64_t dep_tx_id)
+FnResponse add_operation_tx(uint32_t old_cursor, uint32_t new_cursor, lockable_element_t* target, uint64_t tx_id, uint64_t dep_tx_id)
 {
 
     if ( tx_id <= dep_tx_id ) {
         return RES_TX_DEPENDENCY_REJECTED;
     }
     
-    atomic_element_t* element = &tx_map[tx_id & MAX_TX_MASK];
+    lockable_element_t* element = &tx_map[tx_id & MAX_TX_MASK];
     bool locked = try_lock_lockable(element);
     if (!locked) return RES_TX_RESPONSE_RETRY;
     

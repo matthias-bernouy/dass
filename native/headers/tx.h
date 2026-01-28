@@ -27,7 +27,7 @@ typedef struct
     uint32_t old_heap_cursor;
     uint32_t new_heap_cursor;
     uint64_t dep_tx_id;
-    atomic_element_t* target;
+    lockable_element_t* target;
 } TxOperation;
 
 typedef struct
@@ -41,14 +41,14 @@ typedef struct
     uint32_t  checksum;
 } Tx;
 
-typedef atomic_element_t TxMap;
+typedef lockable_element_t TxMap;
 
 extern _Atomic uint64_t tx_counter;
 extern TxMap tx_map[MAX_TX];
 
 uint64_t      create_tx();
 Tx*           get_tx(uint64_t transaction_id);
-FnResponse    add_operation_tx(uint32_t old_cursor, uint32_t new_cursor, atomic_element_t* target, uint64_t tx_id, uint64_t dep_tx_id);
+FnResponse    add_operation_tx(uint32_t old_cursor, uint32_t new_cursor, lockable_element_t* target, uint64_t tx_id, uint64_t dep_tx_id);
 FnResponse    abort_operations_tx(TxOperation* operations, uint32_t operation_count);
 FnResponse    commit_tx(uint64_t transaction_id);
 FnResponse    abort_tx(uint64_t transaction_id);

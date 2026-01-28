@@ -23,19 +23,18 @@ typedef struct {
     CONCURRENCY_STATUS status;
 } MetadataConcurrencyElement;
 
-typedef _Atomic uint64_t atomic_element_t;
+typedef _Atomic uint64_t lockable_element_t;
 
 // Internal Functions
 
 
 // Exposed Functions
-MetadataConcurrencyElement wait_metadata_lockable(atomic_element_t* val);
-MetadataConcurrencyElement metadata_lockable(atomic_element_t* val);
+MetadataConcurrencyElement wait_metadata_lockable(lockable_element_t* val);
+MetadataConcurrencyElement metadata_lockable(lockable_element_t* val);
 uint64_t pack_lockable(uint64_t cursor, uint8_t status);
-bool free_update_lockable(atomic_element_t *actual_element, uint64_t cursor);
-bool free_lockable(atomic_element_t *actual_element);
-bool try_lock_lockable(atomic_element_t *actual_element);
-bool equals_lockable(MetadataConcurrencyElement metadata1, MetadataConcurrencyElement metadata2);
+bool free_update_lockable(lockable_element_t *actual_element, uint64_t cursor);
+bool free_lockable(lockable_element_t *actual_element);
+bool try_lock_lockable(lockable_element_t *actual_element);
 
 
 #endif

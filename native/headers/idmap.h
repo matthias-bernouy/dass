@@ -25,7 +25,7 @@ typedef struct
     uint64_t value;
 } IdentityMapElement;
 
-typedef atomic_element_t IdentityMap;
+typedef lockable_element_t IdentityMap;
 
 // Global Variables
 extern IdentityMap identity_map[ID_MAP_SIZE];

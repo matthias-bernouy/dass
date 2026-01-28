@@ -10,7 +10,7 @@ FnResponse link_idmap(const uint8_t *key, size_t length, uint64_t value, uint64_
     while (tries < CONCURRENCY_MAX_TRIES)
     {
 
-        atomic_element_t* element = &identity_map[current_index];
+        lockable_element_t* element = &identity_map[current_index];
 
         MetadataConcurrencyElement meta_start     = wait_metadata_lockable(element);
         assert(meta_start.status == CONCURRENCY_STATUS_FREE || meta_start.status == CONCURRENCY_STATUS_LOCKED);
@@ -21,8 +21,8 @@ FnResponse link_idmap(const uint8_t *key, size_t length, uint64_t value, uint64_
             continue;
         }
 
-        uint64_t id_tx = 0X0000000000000000ULL;
-        if ( meta_start.cursor > 1024 ) {
+        uint64_t id_tx = IDENTIFIER_EMPTY;
+        if ( meta_start.cursor > IDENTIFIER_START_INDEX ) {
             const heap_element*        heap_element   = read_heap(meta_start.cursor);
             assert(heap_element != NULL);
             assert(heap_element->length == sizeof(IdentityMapElement));

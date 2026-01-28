@@ -6,7 +6,9 @@
                 "${workspaceFolder}/native/src",
                 "${workspaceFolder}/native/headers" 
             ],
-            "defines": [],
+            "defines": [
+                "DEV_MODE"
+            ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",

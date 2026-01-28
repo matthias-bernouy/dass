@@ -4,7 +4,7 @@ FnResponse abort_operations_tx(TxOperation* operations, uint32_t operation_count
 {
     for (uint32_t i = 0; i < operation_count; i++) {
         TxOperation* operation = &operations[i];
-        atomic_element_t* target = operation->target;
+        lockable_element_t* target = operation->target;
 
         retry:
         bool locked = try_lock_lockable(target);

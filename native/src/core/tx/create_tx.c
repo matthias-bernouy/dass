@@ -5,7 +5,7 @@ uint64_t create_tx()
     for (int i = 0; i < 32; i++)
     {
         uint64_t index = atomic_fetch_add_explicit(&tx_counter, 1, memory_order_relaxed);
-        atomic_element_t* element = &tx_map[index & MAX_TX_MASK];
+        lockable_element_t* element = &tx_map[index & MAX_TX_MASK];
         
         bool locked = try_lock_lockable(element);
         if (!locked) continue;

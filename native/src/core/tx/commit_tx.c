@@ -2,7 +2,7 @@
 
 FnResponse commit_tx(uint64_t tx_id)
 {
-    atomic_element_t* element = &tx_map[tx_id & MAX_TX_MASK];
+    lockable_element_t* element = &tx_map[tx_id & MAX_TX_MASK];
     bool locked = try_lock_lockable(element);
     if (!locked) return RES_TX_RESPONSE_RETRY;
     

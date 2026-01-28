@@ -1,6 +1,6 @@
 #include "lockable.h"
 
-bool free_lockable(atomic_element_t *actual_element)
+bool free_lockable(lockable_element_t *actual_element)
 {
     uint64_t old_value, new_value, tries = 0;
     retry:

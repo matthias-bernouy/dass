@@ -21,7 +21,7 @@ extern uint8_t          heap[BASE_HEAP_SIZE];
 extern _Atomic uint64_t heap_cursor;
 extern uint64_t         heap_size;
 
-// Thread Global variables
+// Thread variables
 extern _Thread_local uint64_t thread_reservation_cursor;
 extern _Thread_local uint64_t thread_reservation_limit;
 
@@ -29,8 +29,8 @@ extern _Thread_local uint64_t thread_reservation_limit;
 void reservation_heap();
 
 // Exposed Functions
-uint32_t              write_heap(void* data, uint32_t length);
-void                  free_heap(uint32_t cursor);
-const heap_element*   read_heap(uint32_t cursor);
+uint64_t              write_heap(void* data, uint32_t length);
+void                  free_heap(uint64_t cursor);
+const heap_element*   read_heap(uint64_t cursor);
 
 #endif

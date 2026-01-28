@@ -5,7 +5,7 @@
  * Waits until the concurrency element is not locked and retrieves its metadata.
  * If the element remains locked after a maximum number of tries, it returns the metadata anyway.
  */
-MetadataConcurrencyElement wait_metadata_lockable(atomic_element_t* val)
+MetadataConcurrencyElement wait_metadata_lockable(lockable_element_t* val)
 {
     uint64_t loaded_val;
     uint32_t try_count = 0;

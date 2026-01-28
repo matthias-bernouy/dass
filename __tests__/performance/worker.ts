@@ -6,7 +6,7 @@ import { workerData, parentPort } from "worker_threads";
 
 const { keys } = workerData;
 
-const iterations = 100_000;
+const iterations = 1_000_000;
 
 parentPort?.on("message", () => {
     for (let i = 0; i < iterations; i++) {

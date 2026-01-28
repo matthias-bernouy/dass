@@ -15,8 +15,15 @@
 
 #include "responses.h"
 
-// Probably define macro for debug/release builds
-#include <assert.h>
+#ifdef DEV_MODE
+    #include <assert.h>
+    #include <stdio.h>
+#else
+    #ifndef NDEBUG
+        #define NDEBUG
+    #endif
+    #include <assert.h>
+#endif
 
  
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__)
@@ -27,6 +34,9 @@
       __asm__ __volatile__("yield" ::: "memory");
   }
 #endif
+
+#define IDENTIFIER_START_INDEX 1024
+#define IDENTIFIER_EMPTY 0x0000000000000000ULL
 
 
 uint64_t get_now_nanoseconds();

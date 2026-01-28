@@ -5,7 +5,7 @@ import { Worker } from "worker_threads"
 
 test("performance test placeholder", async () => {
 
-    const iterations = 100_000;
+    const iterations = 16_000_000;
     const keys = [];
     for (let i = 0; i < 1100000; i++) {
         keys.push(`key_${i}`);
@@ -14,7 +14,7 @@ test("performance test placeholder", async () => {
 
     const workers = []
 
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 16; i++) {
         workers.push(new Worker(new URL("./worker.ts", import.meta.url).toString(), {
             workerData: {
                 keys: keys
