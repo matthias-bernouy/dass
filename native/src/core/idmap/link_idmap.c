@@ -2,7 +2,7 @@
 
 FnResponse link_idmap(const uint8_t *key, size_t length, uint64_t value, uint64_t tx_id)
 {
-    uint64_t h = xxh32_fixed(key, length, 0);
+    uint64_t h = xxh64_fixed(key, length, 0);
     uint32_t index = (uint32_t)(h & ID_MAP_MASK);
     uint64_t tries = 0;
 
@@ -25,17 +25,19 @@ FnResponse link_idmap(const uint8_t *key, size_t length, uint64_t value, uint64_
         }
 
         const IdentityMapElement* element_end = (const IdentityMapElement*) try_get_and_lock_lockable(element);
+        printf("element_start %p\n", element_start);
+        printf("element_end %p\n", element_end);
 
-        if ( element_start != element_end ) {
+        if ( element_start != element_end && element_start != NULL ) {
             free_lockable(element);
             _mm_pause();
             continue;
         }
 
         IdentityMapElement new_data = {
+            .transaction_id = tx_id,
             .hash = h,
             .value = value,
-            .transaction_id = tx_id,
             .status = ID_MAP_ELEMENT_USED
         };
 
@@ -50,5 +52,6 @@ FnResponse link_idmap(const uint8_t *key, size_t length, uint64_t value, uint64_
         return true;
     }
 
+    assert(false);
     return RES_SYS_ERR_MAX_ITERATION;
 }

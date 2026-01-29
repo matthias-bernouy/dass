@@ -2,7 +2,7 @@
 
 FnResponse unlink_idmap(const uint8_t *key, size_t length, uint64_t tx_id)
 {
-    uint64_t h = xxh32_fixed(key, length, 0);
+    uint64_t h = xxh64_fixed(key, length, 0);
     uint32_t index = (uint32_t)(h & ID_MAP_MASK);
     uint64_t tries = 0;
 

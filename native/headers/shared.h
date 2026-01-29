@@ -41,5 +41,6 @@
 
 uint64_t get_now_nanoseconds();
 uint32_t xxh32_fixed(const void* input, size_t len, uint32_t seed);
+uint64_t xxh64_fixed(const void* input, size_t len, uint64_t seed)
 
 #endif

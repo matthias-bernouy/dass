@@ -19,10 +19,11 @@ typedef enum {
 
 typedef struct
 {
-    ID_MAP_ELEMENT_STATUS status;
     uint64_t transaction_id;
     uint64_t hash;
     uint64_t value;
+    uint32_t status;
+    uint8_t  padding[4];
 } IdentityMapElement;
 
 typedef lockable_element_t IdentityMap;

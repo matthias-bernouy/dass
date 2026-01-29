@@ -14,9 +14,7 @@ console.log(IdentityMap.exists("exampleKey"));
 
 console.log(IdentityMap.link("exampleKey", BigInt(12345), tx_id));
 
-console.log(IdentityMap.exists("exampleKey"));
-
-Transaction.abort(tx_id);
+console.log("AFTER LINK")
 
 console.log(IdentityMap.exists("exampleKey"));
 
