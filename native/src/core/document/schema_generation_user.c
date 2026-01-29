@@ -15,6 +15,10 @@ typedef struct {
     string_t firstname;
     string_t lastname;
     string_t email;
+    uint8_t  age;
+    string_t phone;
 
-    uint8_t  data[];
+    uint64_t balance;
+
+    uint8_t  raw[];
 } User;
