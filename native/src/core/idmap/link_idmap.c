@@ -25,10 +25,8 @@ FnResponse link_idmap(const uint8_t *key, size_t length, uint64_t value, uint64_
         }
 
         const IdentityMapElement* element_end = (const IdentityMapElement*) try_get_and_lock_lockable(element);
-        printf("element_start %p\n", element_start);
-        printf("element_end %p\n", element_end);
 
-        if ( element_start != element_end && element_start != NULL ) {
+        if ( element_start != element_end ) {
             free_lockable(element);
             _mm_pause();
             continue;

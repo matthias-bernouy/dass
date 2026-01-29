@@ -1,16 +1,11 @@
 #include "lockable.h"
 
-bool free_lockable(lockable_element_t *actual_element)
+/**
+ * To use only when the lockable is already locked by the current thread.
+ */
+void free_lockable(lockable_element_t *actual_element)
 {
-    uint64_t old_value, new_value, tries = 0;
-    retry:
-        MetadataConcurrencyElement metadata = wait_metadata_lockable(actual_element);
-        new_value = pack_lockable(metadata.cursor, CONCURRENCY_STATUS_FREE);
-        if ( !atomic_compare_exchange_weak(actual_element, &old_value, new_value) ) {
-            if (tries++ > CONCURRENCY_MAX_TRIES) {
-                return false;
-            }
-            goto retry;
-        }
-        return true;
+    MetadataConcurrencyElement metadata = metadata_lockable(actual_element);
+    uint64_t new_value = pack_lockable(metadata.cursor, CONCURRENCY_STATUS_FREE);
+    atomic_exchange_explicit(actual_element, new_value, memory_order_release);
 }

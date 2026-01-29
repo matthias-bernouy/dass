@@ -8,9 +8,11 @@ void reservation_heap()
         free_heap(thread_reservation_cursor);
     }
 
-    uint64_t new_cursor = atomic_fetch_add_explicit(&heap_cursor, (BASE_RESERVATION_PER_THREAD), memory_order_acq_rel);
+    // Losing BASE_RESERVATION_PER_THREAD bytes
+    uint64_t old_cursor = atomic_fetch_add_explicit(&heap_cursor, (BASE_RESERVATION_PER_THREAD), memory_order_acq_rel);
+    uint64_t new_cursor = old_cursor + (BASE_RESERVATION_PER_THREAD);
     uint64_t new_limit = new_cursor + (BASE_RESERVATION_PER_THREAD);
 
-    thread_reservation_cursor = new_cursor;
+    thread_reservation_cursor = new_cursor + 1;
     thread_reservation_limit = new_limit;
 }

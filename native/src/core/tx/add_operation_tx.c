@@ -3,29 +3,27 @@
 FnResponse add_operation_tx(uint32_t old_cursor, uint32_t new_cursor, lockable_element_t* target, uint64_t tx_id, uint64_t dep_tx_id)
 {
 
-    if ( tx_id <= dep_tx_id ) {
-        return RES_TX_DEPENDENCY_REJECTED;
-    }
+    if ( tx_id <= dep_tx_id ) return RES_TX_DEPENDENCY_REJECTED;
     
     lockable_element_t* element = &tx_map[tx_id & MAX_TX_MASK];
-    bool locked = try_lock_lockable(element);
-    if (!locked) return RES_TX_RESPONSE_RETRY;
-    
-    Tx* transaction = get_tx(tx_id);
+    Tx* tx = try_get_and_lock_lockable(element);
 
-    if (transaction == NULL) {
-        free_lockable(element);
-        return RES_TX_NO_TRANSACTION_FOUND_IN_ADD_ACTION_TRANSACTION;
+    // Case when lock is not acquired OR transaction does not exist
+    if (tx == NULL) {
+        Tx* tx = get_lockable(element);
+        assert(tx != NULL);
+        if (tx == NULL) return RES_TX_NO_TRANSACTION_FOUND_IN_START_OF_COMMIT;
+        else return RES_TX_RESPONSE_RETRY;
     }
 
-    transaction->operations[transaction->operation_counter] = (TxOperation) {
+    tx->operations[tx->operation_counter] = (TxOperation) {
         .old_heap_cursor = old_cursor,
         .new_heap_cursor = new_cursor,
         .dep_tx_id = dep_tx_id,
         .target = target
     };
 
-    transaction->operation_counter += 1;
+    tx->operation_counter += 1;
 
     free_lockable(element);
 

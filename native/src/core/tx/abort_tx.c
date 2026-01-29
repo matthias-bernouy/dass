@@ -6,7 +6,7 @@ FnResponse abort_tx(uint64_t tx_id)
     bool locked = try_lock_lockable(element);
     if (!locked) return RES_TX_RESPONSE_RETRY;
     
-    Tx* tx = get_tx(tx_id);
+    Tx* tx = get_lockable(element);
 
     tx->status = TX_STATUS_ABORTED;
 

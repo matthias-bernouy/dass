@@ -18,9 +18,10 @@ MetadataConcurrencyElement wait_metadata_lockable(lockable_element_t* val)
         if (metadata.status != CONCURRENCY_STATUS_LOCKED) {
             return metadata;
         }
-        if (++try_count > CONCURRENCY_MAX_TRIES) {
+        if (++try_count > 10240) {
             return metadata;
         }
+        _mm_pause();
         goto retry;
     
 }

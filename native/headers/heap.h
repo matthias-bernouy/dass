@@ -35,7 +35,7 @@ void reservation_heap();
 
 // Exposed Functions
 uint64_t        write_heap(void* data, uint32_t length);
-void                  free_heap(uint64_t cursor);
-const void*           get_ptr_heap(uint64_t cursor);
+void            free_heap(uint64_t cursor);
+void*           get_ptr_heap(uint64_t cursor);
 
 #endif

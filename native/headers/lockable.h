@@ -38,11 +38,11 @@ MetadataConcurrencyElement metadata_lockable(lockable_element_t* val);
 
 // Exposed Functions
 FnResponse safe_total_update_lockable(lockable_element_t *actual_element, void* data, uint32_t length, uint64_t tx_id, uint64_t dep_tx_id);
-bool free_lockable(lockable_element_t *actual_element);
-bool free_update_lockable(lockable_element_t *element, void* data, uint32_t length);
+void free_lockable(lockable_element_t *actual_element);
+void free_update_lockable(lockable_element_t *element, void* data, uint32_t length);
 void free_update_cursor_lockable(lockable_element_t *element, uint64_t cursor);
 
-const void* get_lockable(lockable_element_t *ele);
-const void* try_get_and_lock_lockable(lockable_element_t *ele);
+void* get_lockable(lockable_element_t *ele);
+void* try_get_and_lock_lockable(lockable_element_t *ele);
 
 #endif

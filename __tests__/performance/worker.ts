@@ -1,3 +1,4 @@
+import { expect } from "bun:test";
 import { exit } from "process";
 import { IdentityMap } from "src/lib/native_bridge/daas-identity-map";
 import { Transaction } from "src/lib/native_bridge/dass-transaction";
@@ -12,8 +13,8 @@ parentPort?.on("message", () => {
     for (let i = 0; i < iterations; i++) {
         const tx_id = Transaction.create();
         IdentityMap.link(keys[i], BigInt(i), tx_id);
-        Transaction.commit(tx_id);
         IdentityMap.exists(keys[i]);
+        Transaction.commit(tx_id);
     }
 
     exit(0);
