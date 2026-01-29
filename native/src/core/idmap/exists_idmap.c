@@ -17,13 +17,13 @@ FnResponse exists_idmap(const uint8_t *key, size_t length)
         const IdentityMapElement*  element_data   = (const IdentityMapElement*)get_lockable(element);
 
         if ( element_data == NULL ) {
-            return RES_IDENTIFIER_NOT_FOUND;
+            return false;
         }
 
         FnResponse slot_state = slot_state_idmap(element_data, h);
 
-        if (slot_state == RES_IDENTITY_MAP_SLOT_EQUALS) return RES_IDENTIFIER_EXISTS;
-        if (slot_state == RES_IDENTITY_MAP_SLOT_AVAILABLE) return RES_IDENTIFIER_NOT_FOUND;
+        if (slot_state == RES_IDENTITY_MAP_SLOT_EQUALS) return true;
+        if (slot_state == RES_IDENTITY_MAP_SLOT_AVAILABLE) return false;
         if (slot_state == RES_IDENTITY_MAP_SLOT_DELETED || slot_state == RES_IDENTITY_MAP_SLOT_USED) {
             index = (index + 1) & ID_MAP_MASK;
             continue;

@@ -1,27 +1,22 @@
-import { processResponse } from "./daas-response-fn";
-import { symbols } from "./dass-dlopen";
 import { ptr } from "bun:ffi";
+import { exists_idmap_native, link_idmap_native, unlink_idmap_native } from "./dass-dlopen";
+import { processResponse } from "./daas-response-fn";
 
+const bufferWrite = Buffer.prototype.write;
+const kBuffer = new Uint8Array(1024); 
+const kPtr = ptr(kBuffer);
 
-export class IdentityMap {
+export function exists_idmap(key: string): boolean {
+    const written = bufferWrite.call(kBuffer, key);
+    return processResponse(exists_idmap_native(kPtr, written));
+}
 
-    static link(key: any, value: bigint, tx_id: bigint) {
-        // In the future, we will reuse allocated memory for keys
-        const buffer = Buffer.from(key);
-        const res = symbols.link_idmap(ptr(buffer), buffer.length, value, tx_id);
-        return processResponse(res);
-    }
+export function link_idmap(key: string, value: bigint, tx_id: bigint): boolean {
+    const written = bufferWrite.call(kBuffer, key);
+    return processResponse(link_idmap_native(kPtr, written, value, tx_id));
+}
 
-    static unlink(key: any, tx_id: bigint) {
-        const buffer = Buffer.from(key);
-        const res = symbols.unlink_idmap(ptr(buffer), buffer.length, tx_id);
-        return processResponse(res);
-    }
-
-    static exists(key: any): boolean {
-        const buffer = Buffer.from(key);
-        const res = symbols.exists_idmap(ptr(buffer), buffer.length);
-        return processResponse(res);
-    }
-
+export function unlink_idmap(key: string, tx_id: bigint): boolean {
+    const written = bufferWrite.call(kBuffer, key);
+    return processResponse(unlink_idmap_native(kPtr, written, tx_id));
 }

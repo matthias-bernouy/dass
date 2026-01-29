@@ -39,3 +39,10 @@ export const { symbols } = dlopen(path, {
 
 });
 
+export const link_idmap_native = symbols.link_idmap;
+export const unlink_idmap_native = symbols.unlink_idmap;
+export const exists_idmap_native = symbols.exists_idmap;
+
+export const create_tx_native = symbols.create_tx;
+export const commit_tx_native = symbols.commit_tx;
+export const abort_tx_native = symbols.abort_tx;

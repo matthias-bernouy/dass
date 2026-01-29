@@ -1,7 +1,5 @@
 import { test, expect } from "bun:test";
-import { IdentityMap } from "src/lib/native_bridge/daas-identity-map";
-import { Transaction } from "src/lib/native_bridge/dass-transaction";
-import { Worker } from "worker_threads"
+import { Worker } from "worker_threads";
 
 test("performance test placeholder", async () => {
 
@@ -10,7 +8,6 @@ test("performance test placeholder", async () => {
     for (let i = 0; i < 1100000; i++) {
         keys.push(`key_${i}`);
     }
-
 
     const workers = []
 

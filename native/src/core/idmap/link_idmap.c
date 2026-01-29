@@ -16,7 +16,7 @@ FnResponse link_idmap(const uint8_t *key, size_t length, uint64_t value, uint64_
         if ( element_start != NULL ) {
             dep_tx_id = element_start->transaction_id;
             FnResponse slot_state = slot_state_idmap(element_start, h);
-            if (slot_state == RES_IDENTITY_MAP_SLOT_EQUALS) return RES_IDENTIFIER_EXISTS;
+            if (slot_state == RES_IDENTITY_MAP_SLOT_EQUALS) return false;
             if (slot_state == RES_IDENTITY_MAP_SLOT_TIMEOUT) return RES_SYS_ERR_TIMEOUT;
             if (slot_state == RES_IDENTITY_MAP_SLOT_USED) {
                 index = (index + 1) & ID_MAP_MASK;

@@ -18,10 +18,10 @@ prod: build
 dev: CFLAGS = $(BASE_CFLAGS) -g3 -Og -DDEV_MODE -DDEBUG
 dev: build
 
-build: $(SOURCES)
-	@mkdir -p $(BUILD_DIR)
-	@echo "🔨 Build en cours avec FLAGS: $(CFLAGS)"
-	$(CC) $(CFLAGS) $(SOURCES) -o $(BUILD_DIR)/$(NAME) -latomic
+build:
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(SOURCES) -o $(BUILD_DIR)/$(NAME)
+	@echo "✅ Build terminé : $(BUILD_DIR)/$(NAME)"
 
 clean:
 	rm -rf $(BUILD_DIR)
