@@ -4,41 +4,21 @@
 #include "shared.h"
 #include "errors.h"
 
-#define MAX_SHARD_SHIFT_DOCUMENT 32 // 2^32 = 4 Billion shards
-#define MAX_SHARD_DOCUMENT (1ULL << MAX_SHARD_SHIFT_DOCUMENT)
+#define MAX_SHARD_SHIFT 32 // 2^32 = 4 Billion shards
+#define MAX_SHARD      (1ULL << MAX_SHARD_SHIFT)
 
-#define MAX_ID_IN_SHARD_SHIFT_DOCUMENT 16 // 2^16 = 65,536 IDs per shard
-#define MAX_ID_IN_SHARD_DOCUMENT (1ULL << MAX_ID_IN_SHARD_SHIFT_DOCUMENT)
+#define MAX_DOCUMENT_IN_SHARD_SHIFT 16 // 2^16 = 65,536 IDs per shard
+#define MAX_DOCUMENT_IN_SHARD (1ULL << MAX_DOCUMENT_IN_SHARD_SHIFT)
 
-#define BASE_HEAP_SIZE (1ULL << BASE_HEAP_SIZE_SHIFT)
-#define BASE_RESERVATION_PER_THREAD (1ULL << BASE_RESERVATION_PER_THREAD_SHIFT)
+#define DEFAULT_MAX_ZONE 4
+#define DEFAULT_MAX_SHARD 16384
 
-typedef enum {
-    HEAP_STATUS_FREE    = 0,
-    HEAP_STATUS_USED    = 1
-} HEAP_STATUS;
 
 typedef struct {
-    uint8_t status;
-    uint32_t length;
-    uint8_t data[];
-} heap_element;
-
-// Global Variables
-extern uint8_t          heap[BASE_HEAP_SIZE];
-extern _Atomic uint64_t heap_cursor;
-extern uint64_t         heap_size;
-
-// Thread variables
-extern _Thread_local uint64_t thread_reservation_cursor;
-extern _Thread_local uint64_t thread_reservation_limit;
-
-// Internal Functions
-void reservation_heap();
-
-// Exposed Functions
-uint64_t        write_heap(void* data, uint32_t length);
-void            free_heap(uint64_t cursor);
-void*           get_ptr_heap(uint64_t cursor);
+    uint64_t salt;
+    uint16_t zone;
+    uint32_t shard;
+    uint16_t id;
+} DocumentComposedID;
 
 #endif
