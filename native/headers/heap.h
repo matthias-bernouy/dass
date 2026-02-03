@@ -4,8 +4,8 @@
 #include "shared.h"
 #include "errors.h"
 
-#define BASE_HEAP_SIZE_SHIFT 32 // 2^32 = 4 GB
-#define BASE_RESERVATION_PER_THREAD_SHIFT 24 // 2^24 = 16 MB
+#define BASE_HEAP_SIZE_SHIFT 34 // 2^34 = 16 GB
+#define BASE_RESERVATION_PER_THREAD_SHIFT 28 // 2^28 = 256 MB
 
 #define BASE_HEAP_SIZE (1ULL << BASE_HEAP_SIZE_SHIFT)
 #define BASE_RESERVATION_PER_THREAD (1ULL << BASE_RESERVATION_PER_THREAD_SHIFT)
@@ -35,6 +35,7 @@ void reservation_heap();
 
 // Exposed Functions
 uint64_t        write_heap(void* data, uint32_t length);
+void*           calloc_heap(uint32_t length);
 void            free_heap(uint64_t cursor);
 void*           get_ptr_heap(uint64_t cursor);
 

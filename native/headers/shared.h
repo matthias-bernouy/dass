@@ -12,6 +12,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <stdio.h>
+#include <stdalign.h>
 
 #include "responses.h"
 
@@ -38,9 +39,16 @@
 #define IDENTIFIER_START_INDEX 1024
 #define IDENTIFIER_EMPTY 0x0000000000000000ULL
 
+#define CACHELINE_SIZE 64
+
+typedef struct {
+    alignas(CACHELINE_SIZE) _Atomic uint64_t value;
+} aligned_counter_t;
+
 
 uint64_t get_now_nanoseconds();
 uint32_t xxh32_fixed(const void* input, size_t len, uint32_t seed);
 uint64_t xxh64_fixed(const void* input, size_t len, uint64_t seed);
+uint64_t random64();
 
 #endif

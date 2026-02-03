@@ -29,6 +29,9 @@ typedef struct {
 } MetadataConcurrencyElement;
 
 typedef _Atomic uint64_t lockable_element_t;
+typedef struct {
+    alignas(CACHELINE_SIZE) lockable_element_t element;
+} aligned_lockable_element_t;
 
 // Internal Functions
 bool try_lock_lockable(lockable_element_t *actual_element);

@@ -16,6 +16,6 @@ uint64_t write_heap(void* data, uint32_t length)
     element->length = length;
     memcpy(element->data, data, length);
 
-    thread_reservation_cursor += (sizeof(heap_element) + length + 7) & ~7;
+    thread_reservation_cursor += (sizeof(heap_element) + length + 63) & ~63;
     return cursor + sizeof(heap_element);
 }

@@ -9,7 +9,7 @@ void reservation_heap()
     }
 
     // Losing BASE_RESERVATION_PER_THREAD bytes
-    uint64_t old_cursor = atomic_fetch_add_explicit(&heap_cursor, (BASE_RESERVATION_PER_THREAD), memory_order_acq_rel);
+    uint64_t old_cursor = atomic_fetch_add_explicit(&heap_cursor, (BASE_RESERVATION_PER_THREAD), memory_order_relaxed);
     uint64_t new_cursor = old_cursor + (BASE_RESERVATION_PER_THREAD);
     uint64_t new_limit = new_cursor + (BASE_RESERVATION_PER_THREAD);
 

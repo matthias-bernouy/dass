@@ -8,7 +8,7 @@ When client calculate the shards correspondances, he filter the servers who have
 SO
 An id of document is : [64bits:salt][16bits:zone][32bits:shardID][16bits:IdInShard]
 
-We can have 2^48 documents for each zone, but we can have Global1, Global2, Global3 if we need more documents. Just to add to all servers these tags.
+We can have a total of 2^48 documents for each zone, but we can have Global1, Global2, Global3 if we need more documents. Just to add to all servers these tags.
 
 
 
