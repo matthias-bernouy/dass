@@ -4,17 +4,17 @@
 
 FnResponse safe_total_update_lockable(lockable_element_t *element, void* data, uint32_t length, uint64_t tx_id, uint64_t dep_tx_id)
 {
-    uint64_t old_value = atomic_load(element);
-    uint64_t cursor = write_heap(data, length);
+    void* old_data = metadata_lockable(element).data;
+    void* new_data = write_heap(data, length);
 
-    FnResponse res_add_operation = add_operation_tx(old_value & CURSOR_MASK, cursor, element, tx_id, dep_tx_id);
+    FnResponse res_add_operation = add_operation_tx(old_data, new_data, element, tx_id, dep_tx_id);
     if ( !res_add_operation ) {
         free_lockable(element);
-        free_heap(cursor);
+        free_heap(new_data);
         return res_add_operation;
     }
 
-    free_update_cursor_lockable(element, cursor);
+    free_lockable(element);
 
     return true;
 }

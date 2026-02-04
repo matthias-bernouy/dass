@@ -2,7 +2,7 @@
 #include "heap.h"
 #include "system.h"
 
-DocumentComposedID thread_gen_document_id(uint16_t zone, uint32_t schema_type) {
+DocumentComposedID thread_generate_id_document(uint16_t zone, uint32_t schema_type) {
     retry:
     Shard* shard = thread_shards[zone][schema_type];
     if (shard == NULL || shard->counter >= MAX_DOCUMENT_IN_SHARD) {

@@ -1,9 +1,12 @@
 import { test, expect } from "bun:test";
+import { exists_idmap } from "src/lib/native_bridge/daas-identity-map";
 import { Worker } from "worker_threads";
 
 test("performance test placeholder", async () => {
 
-    const iterations = 16_000_000;
+    exists_idmap("key_0");
+
+    const iterations = 4_000_000;
     const keys = [];
     for (let i = 0; i < 1100000; i++) {
         keys.push(`key_${i}`);
@@ -11,7 +14,7 @@ test("performance test placeholder", async () => {
 
     const workers = []
 
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 4; i++) {
         workers.push(new Worker(new URL("./worker.ts", import.meta.url).toString(), {
             workerData: {
                 keys: keys

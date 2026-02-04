@@ -4,8 +4,8 @@ MetadataConcurrencyElement metadata_lockable(lockable_element_t* val)
 {
     uint64_t loaded_val = atomic_load_explicit(val, memory_order_acquire);
     MetadataConcurrencyElement metadata = {
-        .cursor = loaded_val & CURSOR_MASK,
-        .status = (CONCURRENCY_STATUS)(loaded_val >> STATUS_SHIFT)
+        .data = (void*)(loaded_val & POINTER_MASK),
+        .status = (CONCURRENCY_STATUS)(loaded_val & STATUS_BIT_MASK)
     };
     return metadata;
 }

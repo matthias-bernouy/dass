@@ -1,6 +1,6 @@
 #include "tx.h"
 
-FnResponse add_operation_tx(uint32_t old_cursor, uint32_t new_cursor, lockable_element_t* target, uint64_t tx_id, uint64_t dep_tx_id)
+FnResponse add_operation_tx(void* old_data, void* new_data, lockable_element_t* target, uint64_t tx_id, uint64_t dep_tx_id)
 {
 
     if ( tx_id <= dep_tx_id ) return RES_TX_DEPENDENCY_REJECTED;
@@ -17,8 +17,8 @@ FnResponse add_operation_tx(uint32_t old_cursor, uint32_t new_cursor, lockable_e
     }
 
     tx->operations[tx->operation_counter] = (TxOperation) {
-        .old_heap_cursor = old_cursor,
-        .new_heap_cursor = new_cursor,
+        .old_data = old_data,
+        .new_data = new_data,
         .dep_tx_id = dep_tx_id,
         .target = target
     };

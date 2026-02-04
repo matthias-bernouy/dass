@@ -13,8 +13,8 @@ MetadataConcurrencyElement wait_metadata_lockable(lockable_element_t* val)
 
     retry:
         loaded_val = atomic_load_explicit(val, memory_order_acquire);
-        metadata.cursor = loaded_val & CURSOR_MASK;
-        metadata.status = (CONCURRENCY_STATUS)(loaded_val >> STATUS_SHIFT);
+        metadata.data = (void*)(loaded_val & POINTER_MASK);
+        metadata.status = (CONCURRENCY_STATUS)(loaded_val & STATUS_BIT_MASK);
         if (metadata.status != CONCURRENCY_STATUS_LOCKED) {
             return metadata;
         }

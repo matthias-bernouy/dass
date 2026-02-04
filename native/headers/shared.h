@@ -41,6 +41,8 @@
 
 #define CACHELINE_SIZE 64
 
+typedef _Atomic uint64_t counter_t;
+
 typedef struct {
     alignas(CACHELINE_SIZE) _Atomic uint64_t value;
 } aligned_counter_t;
@@ -49,6 +51,7 @@ typedef struct {
 uint64_t get_now_nanoseconds();
 uint32_t xxh32_fixed(const void* input, size_t len, uint32_t seed);
 uint64_t xxh64_fixed(const void* input, size_t len, uint64_t seed);
+uint64_t hash_u64(uint64_t x);
 uint64_t random64();
 
 #endif

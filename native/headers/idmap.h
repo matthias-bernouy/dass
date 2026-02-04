@@ -1,6 +1,8 @@
 #ifndef ID_MAP_H
 #define ID_MAP_H
 
+// To refactor with the new map structure
+
 #include "shared.h"
 #include "tx.h"
 #include "lockable.h"

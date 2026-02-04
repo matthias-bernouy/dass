@@ -24,8 +24,8 @@ typedef enum{
 
 typedef struct
 {
-    uint32_t old_heap_cursor;
-    uint32_t new_heap_cursor;
+    void* old_data;
+    void* new_data;
     uint64_t dep_tx_id;
     lockable_element_t* target;
 } TxOperation;
@@ -47,7 +47,7 @@ extern _Atomic uint64_t tx_counter;
 extern TxMap tx_map[MAX_TX];
 
 uint64_t      create_tx();
-FnResponse    add_operation_tx(uint32_t old_cursor, uint32_t new_cursor, lockable_element_t* target, uint64_t tx_id, uint64_t dep_tx_id);
+FnResponse    add_operation_tx(void* old_data, void* new_data, lockable_element_t* target, uint64_t tx_id, uint64_t dep_tx_id);
 FnResponse    abort_operations_tx(TxOperation* operations, uint32_t operation_count);
 FnResponse    commit_tx(uint64_t transaction_id);
 FnResponse    abort_tx(uint64_t transaction_id);

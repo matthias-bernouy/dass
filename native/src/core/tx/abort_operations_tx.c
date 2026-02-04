@@ -9,7 +9,7 @@ FnResponse abort_operations_tx(TxOperation* operations, uint32_t operation_count
         retry:
         bool locked = try_lock_lockable(target);
         if (!locked) goto retry;
-        free_update_cursor_lockable(target, operation->old_heap_cursor);
+        free_lockable(target);
     }
     return RES_STANDARD_TRUE;
 }

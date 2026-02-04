@@ -7,7 +7,7 @@ bool try_lock_lockable(lockable_element_t *actual_element)
     old_value = atomic_load(actual_element);
     MetadataConcurrencyElement metadata = wait_metadata_lockable(actual_element);
     metadata.status = CONCURRENCY_STATUS_LOCKED;
-    new_value = pack_lockable(metadata.cursor, metadata.status);
+    new_value = pack_lockable(metadata.data, metadata.status);
 
     return atomic_compare_exchange_strong_explicit(
         actual_element,

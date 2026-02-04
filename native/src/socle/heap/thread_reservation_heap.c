@@ -1,17 +1,20 @@
 #include "heap.h"
 
-void reservation_heap()
+void thread_reservation_heap()
 {
     if (thread_reservation_cursor != thread_reservation_limit) {
         void* data = &heap[thread_reservation_cursor];
         write_heap(data, thread_reservation_limit - thread_reservation_cursor);
-        free_heap(thread_reservation_cursor);
+        // TODO
+        //free_heap(thread_reservation_cursor);
     }
 
     // Losing BASE_RESERVATION_PER_THREAD bytes
     uint64_t old_cursor = atomic_fetch_add_explicit(&heap_cursor, (BASE_RESERVATION_PER_THREAD), memory_order_relaxed);
     uint64_t new_cursor = old_cursor + (BASE_RESERVATION_PER_THREAD);
     uint64_t new_limit = new_cursor + (BASE_RESERVATION_PER_THREAD);
+
+    printf("Heap residual %llu\n", heap_size - old_cursor);
 
     thread_reservation_cursor = new_cursor + 1;
     thread_reservation_limit = new_limit;

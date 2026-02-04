@@ -7,5 +7,5 @@
 __attribute__((constructor))
 void global_auto_init(){
     memset(heap, 0, BASE_HEAP_SIZE);
-    init_schema_shards_counters();
+    // init_schema_shards_counters();
 }
