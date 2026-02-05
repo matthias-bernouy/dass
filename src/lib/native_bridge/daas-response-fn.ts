@@ -1,6 +1,7 @@
 import { DaasResponseCode } from "./daas-responses";
 
 export function processIdentifierResponse(code: bigint): bigint {
+    return code;
     const numCode = Number(code);
     if ( numCode > 1000 ) return code;
     const message = DaasResponseCode[numCode] || "Unknown error code";

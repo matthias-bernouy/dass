@@ -10,7 +10,7 @@ __attribute__((constructor))
 void init_system_document(){
     for (size_t i = 0; i < NB_ZONE; i++)
     {
-        map_shards[i] = create_map(1<<12); // 4096 initial shards
+        map_shards[i] = create_map(1<<12); // 4096 shards per zone, can be changed later if needed
         shards_counters[i].value = 0;
     }
 }

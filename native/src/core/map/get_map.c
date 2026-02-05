@@ -11,11 +11,12 @@ uint64_t get_map(Map* map, uint64_t identifier)
     {
         MapEntry* entry = &map->entries[(base_index + i) % map_size];
 
-        if (entry->locker == LOCKER_LOCKED) {
+        if (  atomic_load_explicit(&entry->locker, memory_order_acquire) == LOCKER_LOCKED) {
             _mm_pause();
             i--;
             tries++;
-            if (tries > 128) {
+            if (tries > CONCURRENCY_MAX_TRIES) {
+                assert(false && "Map is full or too many collisions");
                 return 0XFFFFFFFFFFFFFFFFULL;
             }
             continue;
@@ -31,5 +32,6 @@ uint64_t get_map(Map* map, uint64_t identifier)
 
     }
 
+    assert(false && "Map is full or too many collisions");
     return 0XFFFFFFFFFFFFFFFFULL;
 }

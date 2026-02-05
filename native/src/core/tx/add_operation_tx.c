@@ -1,5 +1,6 @@
 #include "tx.h"
 
+// maybe no need lock here because only one thread can work on a transaction at a time ?
 FnResponse add_operation_tx(void* old_data, void* new_data, lockable_element_t* target, uint64_t tx_id, uint64_t dep_tx_id)
 {
 

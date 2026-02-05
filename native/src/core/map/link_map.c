@@ -16,11 +16,11 @@ FnResponse link_map(Map* map, uint64_t identifier, uint64_t value)
         MapEntry* entry = &map->entries[(base_index + i) % map_size];
 
         // if already locked, wait
-        if ( entry->locker == LOCKER_LOCKED ) {
+        if ( atomic_load_explicit(&entry->locker, memory_order_acquire) == LOCKER_LOCKED ) {
             _mm_pause();
             i--;
             tries++;
-            if (tries > 128) {
+            if (tries > 1500000) {
                 return RES_SYS_ERR_TIMEOUT;
             }
             continue;
@@ -48,6 +48,8 @@ FnResponse link_map(Map* map, uint64_t identifier, uint64_t value)
             atomic_store_explicit(&entry->locker, LOCKER_FREE, memory_order_release);
             return RES_STANDARD_TRUE;
         }
+
+        atomic_store_explicit(&entry->locker, LOCKER_FREE, memory_order_release);
     }
 
     return RES_SYS_ERR_MAX_ITERATION;

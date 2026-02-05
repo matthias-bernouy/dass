@@ -5,6 +5,7 @@
 #include "errors.h"
 #include "lockable.h"
 #include "heap.h"
+#include "map.h"
 
 #define MAX_DOCUMENT_IN_SHARD_SHIFT 16 // 2^16 = 65,536 IDs per shard
 #define MAX_DOCUMENT_IN_SHARD (1ULL << MAX_DOCUMENT_IN_SHARD_SHIFT)
@@ -25,7 +26,7 @@ extern aligned_counter_t shards_counters [NB_ZONE];
 
 extern _Thread_local Shard* thread_shards[NB_ZONE][NB_SCHEMA];
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint64_t salt;
     uint16_t zone;
     uint32_t shard;
@@ -34,6 +35,7 @@ typedef struct {
 
 
 DocumentComposedID thread_generate_id_document(uint16_t zone, uint32_t schema_type);
-void thread_new_shard_document(uint16_t zone, uint32_t schema_type);
+Shard* thread_new_shard_document(uint16_t zone, uint32_t schema_type);
+FnResponse thread_create_document(DocumentComposedID _id, void* data, uint64_t length, uint64_t tx_id);
 
 #endif

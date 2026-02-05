@@ -1,6 +1,6 @@
 #include "shared.h"
 
-_Thread_local uint64_t thread_rng_seed;
+_Thread_local uint64_t thread_rng_seed = 0x1234567890ABCDEFULL;
 
 uint64_t random64(){
     uint64_t z = (thread_rng_seed += 0x9E3779B97F4A7C15ULL);

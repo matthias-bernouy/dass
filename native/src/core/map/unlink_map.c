@@ -50,6 +50,8 @@ FnResponse unlink_map(Map* map, uint64_t identifier)
             atomic_store_explicit(&entry->locker, LOCKER_FREE, memory_order_release);
             continue;
         }
+
+        atomic_store_explicit(&entry->locker, LOCKER_FREE, memory_order_release);
     }
 
     return RES_SYS_ERR_MAX_ITERATION;
