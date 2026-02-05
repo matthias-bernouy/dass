@@ -3,10 +3,10 @@ import { Worker } from "worker_threads";
 
 create_tx();
 
-const iterations = 8_000_000;
+const iterations = 16_000_000*3;
 const workers = []
 
-for (let i = 0; i < 1; i++) {
+for (let i = 0; i < 16; i++) {
     workers.push(new Worker(new URL("./worker.ts", import.meta.url).toString()))
 }
 

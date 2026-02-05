@@ -11,9 +11,11 @@ void thread_reservation_heap()
         //free_heap(thread_reservation_cursor);
     }
 
-    if (new_thread_heap_cursor > BASE_HEAP_SIZE) {
+    if (new_thread_heap_cursor + BASE_RESERVATION_PER_THREAD > BASE_HEAP_SIZE) {
         assert(false && "Out of heap memory");
     }
+
+    printf("new_thread_heap_cursor: %lu, available heap: %lu\n", new_thread_heap_cursor, BASE_HEAP_SIZE - new_thread_heap_cursor);
 
     uint64_t new_limit = new_thread_heap_cursor + BASE_RESERVATION_PER_THREAD;
     thread_reservation_cursor = new_thread_heap_cursor;
