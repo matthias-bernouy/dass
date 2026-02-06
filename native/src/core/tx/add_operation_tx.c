@@ -4,7 +4,7 @@
 FnResponse add_operation_tx(void* old_data, void* new_data, lockable_element_t* target, uint64_t tx_id, uint64_t dep_tx_id)
 {
 
-    if ( tx_id <= dep_tx_id ) return RES_TX_DEPENDENCY_REJECTED;
+    if ( dep_tx_id != 0xFFFFFFFFFFFFFFULL && tx_id <= dep_tx_id ) return RES_TX_DEPENDENCY_REJECTED;
     
     lockable_element_t* element = &tx_map[tx_id & MAX_TX_MASK];
     Tx* tx = try_get_and_lock_lockable(element);

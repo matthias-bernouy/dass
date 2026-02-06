@@ -1,44 +1,75 @@
 #include "shared.h"
 #include "document.h"
 
-#define USER_SCHEMA_ID 1
-#define DEFAULT_ZONE_ID 0
+static const uint16_t SCHEMA_ID   = 1;
+static const uint16_t DEF_ZONE_ID = 0;
 
-typedef struct User {
-    DocumentComposedID _id; // generated
-
-    uint32_t email_length; // required
-    uint32_t fullname_length; // optional
-    uint64_t balance; // generated 0
-
-    uint8_t  raw[]; // calculated
+typedef struct {
+        uint64_t last_tx_id;
+        DocumentComposedID _id;
+        uint32_t name_length;
+        uint64_t age;
+        uint32_t email_length;
+        uint8_t  raw[];
 } User;
 
-User* create_user(uint8_t* email, uint32_t email_length, uint8_t* fullname, uint32_t fullname_length, uint64_t tx_id) {
+User* create_user(uint32_t name_length, char* name, uint64_t age, uint32_t email_length, char* email,  uint64_t tx_id) {
 
-    // Checks
-    // If there is unique constraints
-    // ...
+        uint64_t cpt_raw = 0;
+        const uint64_t create_raw_size = name_length + email_length;
+        const uint64_t total_size = sizeof(User) + create_raw_size;
+        User* element = calloc_heap(total_size);
 
-    // Allocation
-    const uint64_t raw_size = email_length + fullname_length;
-    const uint64_t total_size = sizeof(User) + raw_size;
-    User*    user = calloc_heap(total_size);
-    assert(user != NULL);
+        element->name_length = name_length;
+        element->age = age;
+        element->email_length = email_length;
 
-    // Initialization
-    user->_id = thread_generate_id_document(DEFAULT_ZONE_ID, USER_SCHEMA_ID);
-    user->email_length = email_length;
-    user->fullname_length = fullname_length;
-    user->balance = 0;
 
-    // Raw data
-    memcpy(&user->raw[0], email, email_length);
-    memcpy(&user->raw[email_length], fullname, fullname_length);
+        memcpy(&element->raw[cpt_raw], name, name_length);
+        cpt_raw += name_length;
+        
 
-    // Store document
-    FnResponse res = thread_create_document(user->_id, (void*)user, total_size, tx_id);
-    assert(res == RES_STANDARD_TRUE);
+        memcpy(&element->raw[cpt_raw], email, email_length);
+        cpt_raw += email_length;
+        
 
-    return user;
+        FnResponse res = thread_create_document(element->_id, (void*)element, total_size, tx_id);
+
+        return element;
+}
+
+void* get_user(DocumentComposedID* _id) {
+    return get_document(_id, SCHEMA_ID);
+}
+
+FnResponse del_user(DocumentComposedID* _id, uint64_t tx_id){
+        User* element = get_document(_id, SCHEMA_ID);
+        if (element == NULL) return false;
+        return delete_document(_id, tx_id, element->last_tx_id);
+}
+
+FnResponse update_user(uint32_t name_length, char* name, uint64_t age, uint32_t email_length, char* email,  DocumentComposedID* _id, uint64_t tx_id) {
+
+        User* initial_element = get_document(_id, SCHEMA_ID);
+        if (initial_element == NULL) return false;
+
+    uint64_t cpt_raw = 0;
+    const uint64_t update_raw_size = name_length + email_length;
+    const uint64_t total_size = sizeof(User) + update_raw_size;
+    User* element = calloc_heap(total_size);
+
+        element->name_length = name_length;
+        element->age = age;
+        element->email_length = email_length;
+
+
+        memcpy(&element->raw[cpt_raw], name, name_length);
+        cpt_raw += name_length;
+        
+
+        memcpy(&element->raw[cpt_raw], email, email_length);
+        cpt_raw += email_length;
+        
+
+        return update_document(_id, element, total_size, tx_id, initial_element->last_tx_id);
 }

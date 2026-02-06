@@ -14,7 +14,7 @@ FnResponse safe_total_update_lockable(lockable_element_t *element, void* data, u
         return res_add_operation;
     }
 
-    free_lockable(element);
+    free_update_lockable(element, new_data, length);
 
     return true;
 }

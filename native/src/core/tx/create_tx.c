@@ -38,5 +38,6 @@ uint64_t create_tx()
         return index;
     }
 
+    assert(false && "Too many concurrent transactions");
     return RES_IDENTIFIER_FULL;
 }

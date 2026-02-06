@@ -37,5 +37,8 @@ typedef struct __attribute__((packed)) {
 DocumentComposedID thread_generate_id_document(uint16_t zone, uint32_t schema_type);
 Shard* thread_new_shard_document(uint16_t zone, uint32_t schema_type);
 FnResponse thread_create_document(DocumentComposedID _id, void* data, uint64_t length, uint64_t tx_id);
+FnResponse update_document(DocumentComposedID* target, void* data, uint64_t length, uint64_t tx_id, uint64_t last_tx_id);
+void* get_document(DocumentComposedID* id, uint32_t schema_id);
+FnResponse delete_document(DocumentComposedID* target, uint64_t tx_id, uint64_t last_tx_id);
 
 #endif

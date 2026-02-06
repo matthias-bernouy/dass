@@ -16,7 +16,7 @@ FnResponse commit_tx(uint64_t tx_id)
     // Check all operations dependencies
     for (uint32_t i = 0; i < tx->operation_counter; i++) {
         TxOperation* operation = &tx->operations[i];
-        if ( operation->dep_tx_id < IDENTIFIER_START_INDEX ) continue;
+        if ( operation->dep_tx_id == IDENTIFIER_EMPTY ) continue;
         Tx* tx_dep = get_lockable(element);
         assert(tx_dep != NULL);
         if (tx_dep == NULL) {
@@ -33,6 +33,14 @@ FnResponse commit_tx(uint64_t tx_id)
             free_lockable(element);
             return RES_TX_RESPONSE_ABORTED;
         }
+    }
+
+    for (uint32_t i = 0; i < tx->operation_counter; i++) {
+        TxOperation* operation = &tx->operations[i];
+        if (operation->dep_tx_id != IDENTIFIER_EMPTY){
+            free_heap(operation->old_data);
+        }
+        free_heap(operation->new_data);
     }
 
     // Apply all operations
