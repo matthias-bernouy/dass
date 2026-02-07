@@ -4,6 +4,7 @@ import { NumberField } from "./Field/NumberField";
 import { StringField } from "./Field/StringField";
 import TEMPLATE_C from "@resources/generation/C_DOCUMENT_TEMPLATE.txt";
 import path from "path";
+import { Application } from "../Application";
 
 type SchemaOptions = {
     defaultZone: number;
@@ -41,7 +42,7 @@ export class Schema {
         c = this.processCreate(c);
         c = this.processUpdate(c);
 
-        const dirPath = path.join(process.cwd(), "node_modules", ".dass-generated", "c", "schema");
+        const dirPath = path.join(Application.code_generated_dir, "c", "schema");
         mkdirSync(dirPath, { recursive: true });
         Bun.file(path.join(dirPath, `${this.name.toLowerCase()}.c`)).write(c);
         return c;

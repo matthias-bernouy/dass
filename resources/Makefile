@@ -1,10 +1,10 @@
 NAME = generated.so
 
-SRC_DIR = node_modules/.dass-generated/c
-HEADERS_DIR = node_modules/.dass-generated/c/base/headers
+SRC_DIR = c
+HEADERS_DIR = c/headers
 
-PRE_BUILD_DIR = node_modules/.dass-generated/c_prebuild
-BUILD_DIR = node_modules/.dass-generated/c_compiled
+PRE_BUILD_DIR = c_prebuild
+BUILD_DIR = c_compiled
 
 SOURCES = $(shell find $(SRC_DIR) -name "*.c")
 
@@ -32,10 +32,10 @@ $(PRE_BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 	@echo "Compilé : $<"
 
-clean:
-	rm -rf $(OBJ_DIR) $(BUILD_DIR)
-	@echo "🧹 Clean terminé"
+# clean:
+# 	rm -rf $(PRE_BUILD_DIR) $(BUILD_DIR)
+# 	@echo "🧹 Clean terminé"
 
-re: clean all
+# re: clean all
 
-.PHONY: all clean re dev prod build
+# .PHONY: all clean re dev prod build

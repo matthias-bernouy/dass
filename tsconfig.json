@@ -31,9 +31,8 @@
 
 	"include": [
 		"src/**/*.ts", 
-		"resources/__project_template__/**/*.ts", 
+		"__project_template__/**/*.ts", 
 		"__tests__/**/*.ts",
-		"node_modules/generated-code/**/*.ts"
 	]
 
 }

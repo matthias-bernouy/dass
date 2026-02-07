@@ -8,7 +8,3 @@ export function UserSchema(): Schema {
         .String("password")
 
 }
-
-
-Application.getInstance();
-UserSchema().generate_c();
