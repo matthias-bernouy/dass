@@ -1,14 +1,18 @@
 NAME = generated.so
 
-SRC_DIR = native/src
-HEADERS_DIR = native/headers
-BUILD_DIR = src/lib/native_bridge/build
+SRC_DIR = node_modules/.dass-generated/c
+HEADERS_DIR = node_modules/.dass-generated/c/base/headers
+
+PRE_BUILD_DIR = node_modules/.dass-generated/c_prebuild
+BUILD_DIR = node_modules/.dass-generated/c_compiled
 
 SOURCES = $(shell find $(SRC_DIR) -name "*.c")
 
+PRE_BUILD_O = $(patsubst $(SRC_DIR)/%.c, $(PRE_BUILD_DIR)/%.o, $(SOURCES))
+
 CC = gcc
 INCLUDES = -I$(shell pwd)/$(HEADERS_DIR) -I$(shell pwd)/$(SRC_DIR)
-BASE_CFLAGS = -Wall -Wextra -fPIC -shared $(INCLUDES)
+BASE_CFLAGS = -Wall -Wextra -fPIC $(INCLUDES)
 
 all: prod
 
@@ -18,13 +22,18 @@ prod: build
 dev: CFLAGS = $(BASE_CFLAGS) -g3 -Og -DDEV_MODE -DDEBUG
 dev: build
 
-build:
-	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(SOURCES) -o $(BUILD_DIR)/$(NAME)
-	@echo "✅ Build terminé : $(BUILD_DIR)/$(NAME)"
+build: $(PRE_BUILD_O)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) -shared $(CFLAGS) $(PRE_BUILD_O) -o $(BUILD_DIR)/$(NAME)
+	@echo "✅ Shared library mise à jour : $(BUILD_DIR)/$(NAME)"
+
+$(PRE_BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+	@echo "Compilé : $<"
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(OBJ_DIR) $(BUILD_DIR)
 	@echo "🧹 Clean terminé"
 
 re: clean all

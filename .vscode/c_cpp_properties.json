@@ -3,8 +3,8 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/native/src",
-                "${workspaceFolder}/native/headers" 
+                "${workspaceFolder}/resources/code_c/src",
+                "${workspaceFolder}/resources/code_c/headers" 
             ],
             "defines": [
                 "DEV_MODE"

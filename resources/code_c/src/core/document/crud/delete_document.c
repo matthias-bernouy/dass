@@ -2,7 +2,7 @@
 
 FnResponse delete_document(DocumentComposedID* target, uint64_t tx_id, uint64_t last_tx_id) {
     Shard* shard = (Shard*) get_map(map_shards[target->zone], target->shard);
-    if (shard == NULL) return NULL;
+    if (shard == NULL) return false;
     
     lockable_element_t* document = &shard->documents[target->id].element;
     bool res = try_lock_lockable(document);

@@ -20,11 +20,20 @@
 		"emitDeclarationOnly": true,
 		"declarationMap": false,
 
+		"paths": {
+			"@resources/*": ["resources/*"]
+		},
+
 		"rootDir": ".",
 		"baseUrl": ".",
-
 		"outDir": "dist/"
 	},
 
-	"include": ["**/*.ts", "__tests__/**/*.ts"],
+	"include": [
+		"src/**/*.ts", 
+		"resources/__project_template__/**/*.ts", 
+		"__tests__/**/*.ts",
+		"node_modules/generated-code/**/*.ts"
+	]
+
 }

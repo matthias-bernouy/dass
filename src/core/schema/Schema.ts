@@ -1,7 +1,9 @@
+import { mkdirSync } from "fs";
 import type { Field } from "./Field/Field";
 import { NumberField } from "./Field/NumberField";
 import { StringField } from "./Field/StringField";
-import TEMPLATE_C from "./Template/C_FILE.txt";
+import TEMPLATE_C from "@resources/generation/C_DOCUMENT_TEMPLATE.txt";
+import path from "path";
 
 type SchemaOptions = {
     defaultZone: number;
@@ -33,13 +35,15 @@ export class Schema {
         return this;
     }
 
-    generate(): string {
+    generate_c(): string {
         let c = TEMPLATE_C;
         c = this.processBase(c);
         c = this.processCreate(c);
         c = this.processUpdate(c);
 
-        Bun.file(`native/src/generated/${this.name.toLowerCase()}.c`).write(c);
+        const dirPath = path.join(process.cwd(), "node_modules", ".dass-generated", "c", "schema");
+        mkdirSync(dirPath, { recursive: true });
+        Bun.file(path.join(dirPath, `${this.name.toLowerCase()}.c`)).write(c);
         return c;
     }
 
