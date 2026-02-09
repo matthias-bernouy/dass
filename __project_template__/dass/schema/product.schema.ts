@@ -3,8 +3,9 @@ import { Schema } from "src/core/schema/Schema";
 
 export function ProductSchema(): Schema {
 
-    return Schema.create("Product")
-        .String("name")
-        .Number("price")
+    return Schema.create("Heqsdfsqdfy")
+        .String("namqqsdfqsdfqsdfqsdqsdffsdfe")
+        .Number("pricqsdfe")
+        .Number("stock")
 
 }

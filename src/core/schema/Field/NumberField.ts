@@ -11,9 +11,20 @@ export class NumberField extends Field {
         return "number";
     }
 
+    code_generator_ts_create(): string {
+        return `FFIType.u64`;
+    }
+
+    code_generator_ts_update(): string {
+        return `FFIType.u64`;
+    }
+    
+
     code_generator_c_struct(): string {
         return `\tuint64_t ${this.getName()};`;
     }
+
+
 
     code_generator_c_create_param(): string {
         return `uint64_t ${this.getName()}`;
@@ -30,6 +41,8 @@ export class NumberField extends Field {
     code_generator_c_create_raw_data(): string {
         return "";
     }
+
+
 
     code_generator_c_update_params(): string {
         return this.code_generator_c_create_param();

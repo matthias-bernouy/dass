@@ -1,6 +1,6 @@
 import { ptr, read, toArrayBuffer, type Pointer } from "bun:ffi";
 import { bufferPool256bytes } from "src/utilities/ObjectPool";
-import { create_user_native, get_document_native } from "./dass-dlopen";
+import { create_user_native, get_document_native } from "./ffi";
 
 type DocumentID = {
     salt: bigint;  // 64bits

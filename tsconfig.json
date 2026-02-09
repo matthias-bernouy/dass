@@ -21,7 +21,8 @@
 		"declarationMap": false,
 
 		"paths": {
-			"@resources/*": ["resources/*"]
+			"@resources/*": ["resources/*"],
+			"@generated/*": ["node_modules/.dass-generated/*"]
 		},
 
 		"rootDir": ".",
@@ -32,7 +33,7 @@
 	"include": [
 		"src/**/*.ts", 
 		"__project_template__/**/*.ts", 
-		"__tests__/**/*.ts",
+		"__tests__/**/*.ts", "src/.dass-generated/ts/Server.raw.ts",
 	]
 
 }

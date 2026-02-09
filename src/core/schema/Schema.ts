@@ -1,10 +1,11 @@
-import { mkdirSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
 import type { Field } from "./Field/Field";
 import { NumberField } from "./Field/NumberField";
 import { StringField } from "./Field/StringField";
-import TEMPLATE_C from "@resources/generation/C_DOCUMENT_TEMPLATE.txt";
 import path from "path";
 import { Application } from "../Application";
+import { c_generator } from "./Generator/cGenerator";
+import { tsLib_generator } from "./Generator/ts_lib_methods";
 
 type SchemaOptions = {
     defaultZone: number;
@@ -26,6 +27,8 @@ export class Schema {
         return new Schema(name, opts);
     }
 
+
+    // Fields
     String(fieldName: string): Schema {
         this.fields.push(new StringField(fieldName));
         return this;
@@ -36,58 +39,53 @@ export class Schema {
         return this;
     }
 
-    generate_c(): string {
-        let c = TEMPLATE_C;
-        c = this.processBase(c);
-        c = this.processCreate(c);
-        c = this.processUpdate(c);
+    // Getters
+    getName(): string {
+        return this.name;
+    }
 
+    getFields(): Field[] {
+        return this.fields;
+    }
+
+    getOptions(): SchemaOptions {
+        return this.options;
+    }
+
+    generate_ts_lib(): string {
+        return tsLib_generator(this);
+    }
+
+    async generate_c(): Promise<void> {
+
+        let c = c_generator(this);
+
+        const fileName = `${this.name.toLowerCase()}.c`;
         const dirPath = path.join(Application.code_generated_dir, "c", "schema");
-        mkdirSync(dirPath, { recursive: true });
-        Bun.file(path.join(dirPath, `${this.name.toLowerCase()}.c`)).write(c);
-        return c;
-    }
+        const filePath = path.join(dirPath, fileName);
+        const hashPath = `${filePath}.hash`;
 
-    private mapAndJoin(separator: string, callback: (field: any) => string): string {
-        return this.fields
-            .map(callback)
-            .filter(val => val !== undefined && val !== null && val.trim() !== "")
-            .join(separator);
-    }
+        const currentHash = Bun.hash(c).toString();
 
-    private processBase(template: string): string {
-        let struct = this.mapAndJoin("\n", f => f.code_generator_c_struct());
-        return template
-            .replaceAll("Template", this.name)
-            .replaceAll("Template*", `${this.name}*`)
-            .replaceAll("template", `${this.name.toLowerCase()}`)
-            .replace("static const uint16_t DEF_ZONE_ID = 0;//Generated", `static const uint16_t DEF_ZONE_ID = ${this.options.defaultZone};`)
-            .replace("static const uint16_t SCHEMA_ID   = 0;//Generated", `static const uint16_t SCHEMA_ID   = 1;`)
-            .replace("{{STRUCTS}}", struct);
-    }
+        if (!existsSync(dirPath)) mkdirSync(dirPath, { recursive: true });
 
-    private processCreate(template: string): string {
-        let params          = this.mapAndJoin(", ", f => f.code_generator_c_create_param());
-        let raw_size        = this.mapAndJoin(" + ", f => f.code_generator_c_create_raw_size());
-        let create_object   = this.mapAndJoin("\n", f => f.code_generator_c_create_object());
-        let create_raw_data = this.mapAndJoin("\n", f => f.code_generator_c_create_raw_data());
-        return template
-            .replace("{{CREATE_PARAMS}}", params + (params ? ", " : ""))
-            .replace("const uint64_t create_raw_size = 0;//Generated", `const uint64_t create_raw_size = ${raw_size};`)
-            .replace("{{CREATE_OBJECT}}", create_object)
-            .replace("{{CREATE_RAW_DATA}}", create_raw_data);
-    }
+        const hashFile = Bun.file(hashPath);
+        let oldHash = "";
+        
+        if (await hashFile.exists()) {
+            oldHash = await hashFile.text();
+        }
 
-    private processUpdate(template: string): string {
-        let params          = this.mapAndJoin(", ", f => f.code_generator_c_update_params());
-        let raw_size        = this.mapAndJoin(" + ", f => f.code_generator_c_update_raw_size());
-        let update_object   = this.mapAndJoin("\n", f => f.code_generator_c_update_object());
-        let update_raw_data = this.mapAndJoin("\n", f => f.code_generator_c_update_raw_data());
-        return template
-            .replace("{{UPDATE_PARAMS}}", params + (params ? ", " : ""))
-            .replace("const uint64_t update_raw_size = 0;//Generated", `const uint64_t update_raw_size = ${raw_size};`)
-            .replace("{{UPDATE_OBJECT}}", update_object)
-            .replace("{{UPDATE_RAW_DATA}}", update_raw_data);
+        if (currentHash === oldHash && existsSync(filePath)) {
+            return;
+        }
+        
+        await Promise.all([
+            Bun.write(filePath, c),
+            Bun.write(hashPath, currentHash)
+        ]);
+
     }
 
 }
+

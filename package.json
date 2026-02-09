@@ -4,29 +4,26 @@
     "description": "A decentralized multi workers all in one application framework for JavaScript and TypeScript",
     "main": "dist/index.js",
     "types": "dist/types/index.d.ts",
-
     "exports": {
-        ".": {
-
-        },
+        ".": {},
         "./types": "./node_modules/.dass-generated/Blabla.d.ts"
     },
-    
     "files": [
         "dist/",
         "readme.md"
     ],
-
     "bin": {
         "dass": "./src/cli/cli.ts"
     },
     "scripts": {
         "bun:build": "bun build.ts",
-        "cli": "bun run src/cli/cli.ts"
+        "cli": "bun run src/cli/cli.ts",
+        "dev": "nodemon --watch resources --watch src --ext ts,c,txt,json,h,md --clear --exec 'clear && bun run __project_template__/App.ts'"
     },
     "devDependencies": {
         "@types/bun": "latest",
-        "bun-types": "^1.3.6"
+        "bun-types": "^1.3.6",
+        "nodemon": "^3.1.11"
     },
     "peerDependencies": {
         "typescript": "^5.9.3"

@@ -1,4 +1,4 @@
-NAME = generated.so
+NAME = libdass.so
 
 SRC_DIR = c
 HEADERS_DIR = c/headers

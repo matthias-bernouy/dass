@@ -11,6 +11,16 @@ export class StringField extends Field {
         return "string";
     }
 
+    code_generator_ts_create(): string {
+        return `FFIType.u32, FFIType.ptr`;
+    }
+
+    code_generator_ts_update(): string {
+        return `FFIType.u32, FFIType.ptr`;
+    }
+
+
+
     code_generator_c_struct(): string {
         return `\tuint32_t ${this.getName()}_length;`;
     }

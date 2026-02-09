@@ -31,7 +31,7 @@ void* get_template(DocumentComposedID* _id) {
     return get_document(_id, SCHEMA_ID);
 }
 
-FnResponse del_template(DocumentComposedID* _id, uint64_t tx_id){
+FnResponse delete_template(DocumentComposedID* _id, uint64_t tx_id){
 	Template* element = get_document(_id, SCHEMA_ID);
 	if (element == NULL) return false;
 	return delete_document(_id, tx_id, element->last_tx_id);
