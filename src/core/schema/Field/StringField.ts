@@ -11,6 +11,33 @@ export class StringField extends Field {
         return "string";
     }
 
+    code_generator_ts_http_pre_call_POST(): string {
+        return `
+            const buffer${this.getName()} = bufferPool4096bytes.acquire();
+            const length${this.getName()} = buffer${this.getName()}.write(DAASRequest.requestData["${this.getName()}"] || "");
+        `;
+    }
+
+    code_generator_ts_http_call_params_POST(): string {
+        return `length${this.getName()}, buffer${this.getName()}`;
+    }
+
+    code_generator_ts_http_post_call_POST(): string {
+        return `bufferPool4096bytes.release(buffer${this.getName()});`;
+    }
+
+    code_generator_ts_http_pre_call_PATCH(): string {
+        return this.code_generator_ts_http_pre_call_POST();
+    }
+
+    code_generator_ts_http_call_params_PATCH(): string {
+        return this.code_generator_ts_http_call_params_POST();
+    }
+
+    code_generator_ts_http_post_call_PATCH(): string {
+        return this.code_generator_ts_http_post_call_POST();
+    }
+
     code_generator_ts_create(): string {
         return `FFIType.u32, FFIType.ptr`;
     }
@@ -23,6 +50,18 @@ export class StringField extends Field {
 
     code_generator_c_struct(): string {
         return `\tuint32_t ${this.getName()}_length;`;
+    }
+
+    code_generator_c_get_as_json(): string {
+        return `
+        	memcpy(json_output + json_cpt, "\\"${this.getName()}\\":", ${this.getName().length + 3});
+            json_cpt += ${this.getName().length + 3};
+            memcpy(json_output + json_cpt, "\\"", 1);
+            json_cpt += 1;
+            memcpy(json_output + json_cpt, &element->raw[raw_cpt], element->${this.getName()}_length);
+            json_cpt += element->${this.getName()}_length;
+            memcpy(json_output + json_cpt++, "\\"", 1);
+        `;
     }
 
     code_generator_c_create_param(): string {

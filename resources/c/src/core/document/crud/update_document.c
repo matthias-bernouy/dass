@@ -1,6 +1,7 @@
 #include "document.h"
 
 FnResponse update_document(DocumentComposedID* target, void* data, uint64_t length, uint64_t tx_id, uint64_t last_tx_id) {
+    if (target->zone >= NB_ZONE) return false;
     Shard* shard = (Shard*) get_map(map_shards[target->zone], target->shard);
     if (shard == NULL) return false;
     

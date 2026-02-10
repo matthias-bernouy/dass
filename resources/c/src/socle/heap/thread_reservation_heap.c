@@ -2,7 +2,6 @@
 
 void thread_reservation_heap()
 {
-    printf("Réservation heap: cursor: %lu, limit: %lu\n", thread_reservation_cursor, thread_reservation_limit);
     uint64_t new_thread_heap_cursor = atomic_fetch_add_explicit(&heap_cursor, (BASE_RESERVATION_PER_THREAD), memory_order_acq_rel);
 
     if (thread_reservation_cursor != thread_reservation_limit) {

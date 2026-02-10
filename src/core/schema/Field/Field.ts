@@ -12,6 +12,16 @@ export abstract class Field {
         return this.fieldName;
     }
 
+    abstract code_generator_ts_http_pre_call_POST(): string;
+    abstract code_generator_ts_http_call_params_POST(): string;
+    abstract code_generator_ts_http_post_call_POST(): string;
+
+    abstract code_generator_ts_http_pre_call_PATCH(): string;
+    abstract code_generator_ts_http_call_params_PATCH(): string;
+    abstract code_generator_ts_http_post_call_PATCH(): string;
+
+    abstract code_generator_c_get_as_json(): string;
+
     abstract code_generator_c_struct(): string;
 
     abstract code_generator_c_create_param(): string;

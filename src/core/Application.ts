@@ -6,7 +6,8 @@ import { Glob } from "bun";
 import { scannerSchemas } from "./scanner/scannerSchemas";
 import { smartCopy } from "src/utilities/smartCopy";
 import { watch } from "fs";
-import SYMBOLS_TS from "src/.dass-generated/ts/ffi_methods.raw" with { type: "text" };
+import SYMBOLS_TS from "src/.dass-generated/ts/ffi_methods.raw?raw" with { type: "text" };
+import SERVER_TEMPLATE from "src/.dass-generated/ts/server.raw?raw" with { type: "text" };
 
 const DEFAULT_CONFIG_FOLDER = "./dass/config";
 const DEFAULT_SCHEMA_FOLDER = "./dass/schema";
@@ -43,6 +44,7 @@ export class Application {
         }
 
         smartCopy(path.join(library_dir, "src", ".dass-generated", "Makefile"), path.join(Application.code_generated_dir, "Makefile"));
+        smartCopy(path.join(library_dir, "src", ".dass-generated", "ts", "utilities", "ObjectPool.ts"), path.join(Application.code_generated_dir, "ts", "utilities", "ObjectPool.ts"));
         
     }
 
@@ -63,7 +65,6 @@ export class Application {
             absolute: true
         }));
 
-        console.log(files)
         const schemas = await scannerSchemas(files);
         this.schemas.push(...schemas);
     }
@@ -72,7 +73,6 @@ export class Application {
         let w = watch(path.join(Application.cwd, DEFAULT_SCHEMA_FOLDER), { recursive: true });
 
         w.addListener('change', async (eventType, filename) => {
-            console.log(`[INFO] Detected change in ${filename}, rebuilding...`);
             await this.build();
             w = watch(path.join(Application.cwd, DEFAULT_SCHEMA_FOLDER), { recursive: true });
         });
@@ -81,6 +81,8 @@ export class Application {
     }
 
     async build(){
+        let serverTemplate = SERVER_TEMPLATE;
+
         const start = Bun.nanoseconds();
 
         let ts_methods = "";
@@ -90,22 +92,37 @@ export class Application {
 
         const promises = [];
 
+        let importsInServer = "";
+        let callsInServer = "";
+
         for (let i = 0; i < this.schemas.length; i++){
             promises.push(this.schemas[i]!.generate_c());
-            ts_methods += this.schemas[i]!.generate_ts_lib();
+            promises.push(this.schemas[i]!.generate_ts_http_methods());
+
+            ts_methods += this.schemas[i]!.generate_ts_ffi_methods();
+
+            importsInServer += `import ${this.schemas[i]!.getName()}Route from "./routes/${this.schemas[i]!.getName().toLowerCase()}_routes";\n`;
+            callsInServer += `...${this.schemas[i]!.getName()}Route(),\n`;
         }
+
+        serverTemplate = serverTemplate
+            .replace("//{{ROUTES_IMPORTS}}", importsInServer)
+            .replace("//{{ROUTES_CALLS}}", callsInServer);
+
+        Bun.file(path.join(Application.code_generated_dir, "ts", "server.raw.ts")).write(serverTemplate);
         
         ts = ts
             .replace("//{{METHODS}}", ts_methods)
             .replace("{{PATH_C}}", join(Application.code_generated_dir, "c_compiled", "libdass.so")); 
-        Bun.file(path.join(Application.code_generated_dir, "ts", "ffi_methods.ts")).write(ts);
+
+        Bun.file(path.join(Application.code_generated_dir, "ts", "ffi_methods.raw.ts")).write(ts);
 
         await Promise.all(promises);
 
         Bun.spawnSync(["make", "dev"], {
             cwd: Application.code_generated_dir,
-            stdout: "ignore",
-            stderr: "ignore",
+            stdout: "inherit",
+            stderr: "inherit",
         })
 
         const end = Bun.nanoseconds();
@@ -113,8 +130,6 @@ export class Application {
 
         
         console.log(`[INFO] Reloading completed in ${duration.toFixed(0)} milliseconds...`);
-
-        smartCopy(path.join(library_dir, "src", ".dass-generated", "ts", "Server.raw.ts"), path.join(Application.code_generated_dir, "ts", "Server.raw.ts"));
 
         const module = await import(Application.code_generated_dir + "/ts/Server.raw.ts");
         module.Server();

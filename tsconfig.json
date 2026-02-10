@@ -33,7 +33,7 @@
 	"include": [
 		"src/**/*.ts", 
 		"__project_template__/**/*.ts", 
-		"__tests__/**/*.ts", "src/.dass-generated/ts/Server.raw.ts",
+		"__tests__/**/*.ts", "src/.dass-generated/ts/server.raw.ts",
 	]
 
 }

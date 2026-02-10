@@ -4,6 +4,7 @@
 
 // No need to lock because only one thread write in a shard and get unique IDs
 FnResponse thread_create_document(DocumentComposedID _id, void* data, uint64_t length, uint64_t tx_id) {
+    if (_id.zone >= NB_ZONE) return false;
     Shard* shard = (Shard*) get_map(map_shards[_id.zone], _id.shard);
     assert(shard != NULL);
     

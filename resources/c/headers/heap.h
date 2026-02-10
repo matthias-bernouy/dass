@@ -4,7 +4,7 @@
 #include "shared.h"
 #include "errors.h"
 
-#define BASE_HEAP_SIZE_SHIFT 34 // 2^34 = 16 GB
+#define BASE_HEAP_SIZE_SHIFT 31 // 2^34 = 16 GB
 #define BASE_RESERVATION_PER_THREAD_SHIFT 29 // 2^29 = 512 MB
 
 #define BASE_HEAP_SIZE (1ULL << BASE_HEAP_SIZE_SHIFT)

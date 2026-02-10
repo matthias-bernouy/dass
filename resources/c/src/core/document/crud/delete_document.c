@@ -1,6 +1,7 @@
 #include "document.h"
 
 FnResponse delete_document(DocumentComposedID* target, uint64_t tx_id, uint64_t last_tx_id) {
+    if (target->zone >= NB_ZONE) return false;
     Shard* shard = (Shard*) get_map(map_shards[target->zone], target->shard);
     if (shard == NULL) return false;
     

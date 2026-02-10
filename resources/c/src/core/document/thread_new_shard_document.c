@@ -16,6 +16,7 @@ Shard* thread_new_shard_document(uint16_t zone, uint32_t schema_type) {
     assert(shard_ptr != NULL);
     shard_ptr->shard_id = next_shard_id;
     shard_ptr->counter = 0;
+    shard_ptr->schema_id = schema_type;
 
     FnResponse res = link_map(map_shards[zone], next_shard_id, (uint64_t)shard_ptr);
     assert(res == RES_STANDARD_TRUE);

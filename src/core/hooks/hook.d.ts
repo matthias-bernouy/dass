@@ -3,18 +3,18 @@ export type HookName = "before_process" | "after_process";
 
 export type HookRegister = {
     hookName: HookName;
-    endpoint: string; // Should be * or User/* or */get
-    callback: (req: HookRequest) => HookResponse | Promise<HookResponse>;
-    priority?: number; // Higher priority hooks run first. Default is 0.
+    endpoint: string;
+    callback: (req: DAASRequest) => DAASResponse | Promise<DAASResponse>;
 }
 
-export type HookRequest = {
+export type DAASRequest = {
     headers: Record<string, string>;
-    data: Record<string, string>;
+    requestData: Record<string, string>;
+    internalData: Record<string, string>;
 }
 
-export type HookResponse = {
+export type DAASResponse = {
     statusCode: number;
-    body?: Buffer<ArrayBuffer>;
+    body?: Buffer;
     headers?: Record<string, string>;
 } | void;

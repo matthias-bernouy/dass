@@ -22,3 +22,4 @@ export class ObjectPool<T> {
 
 export const bufferPool256bytes  = new ObjectPool(() => Buffer.alloc(256));
 export const bufferPool1024bytes = new ObjectPool(() => Buffer.alloc(1024));
+export const bufferPool4096bytes = new ObjectPool(() => Buffer.alloc(4096));

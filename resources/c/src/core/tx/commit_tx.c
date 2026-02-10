@@ -17,7 +17,11 @@ FnResponse commit_tx(uint64_t tx_id)
     for (uint32_t i = 0; i < tx->operation_counter; i++) {
         TxOperation* operation = &tx->operations[i];
         if ( operation->dep_tx_id == IDENTIFIER_EMPTY ) continue;
-        Tx* tx_dep = get_lockable(element);
+        Tx* tx_dep = get_lockable(operation->target);
+        if (tx_dep->status == TX_STATUS_FREE) {
+            free_lockable(element);
+            continue;
+        }
         assert(tx_dep != NULL);
         if (tx_dep == NULL) {
             free_lockable(element);
