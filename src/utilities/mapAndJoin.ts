@@ -1,4 +1,4 @@
-import type { Field } from "../Field/Field";
+import type { Field } from "../core/schema/field/Field";
 
 export function  mapAndJoin(fields: Field[], separator: string, callback: (field: any) => string): string {
     return fields

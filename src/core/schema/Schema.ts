@@ -1,13 +1,13 @@
 import { existsSync, mkdirSync } from "fs";
-import type { Field } from "./Field/Field";
-import { NumberField } from "./Field/NumberField";
-import { StringField } from "./Field/StringField";
+import type { Field } from "./field/Field";
+import { NumberField } from "./field/NumberField";
+import { StringField } from "./field/StringField";
 import path from "path";
-import { Application } from "../Application";
-import { c_schema_generator } from "./Generator/c/c_schema_generator";
-import { ts_ffi_methods_generator } from "./Generator/ts/ts_ffi_methods_generator";
-import { http_methods_generator } from "./Generator/ts/http_methods_generator";
-import { smartFileWriter } from "./Generator/smartFileWriter";
+import { Application } from "../application/Application";
+import { c_schema_generator } from "./generator/c/c_schema_generator";
+import { ts_ffi_methods_generator } from "./generator/ts/ts_ffi_methods_generator";
+import { http_methods_generator } from "./generator/ts/http_methods_generator";
+import { smartFileWriter } from "../../utilities/smartFileWriter";
 
 type SchemaOptions = {
     defaultZone: number;

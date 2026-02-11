@@ -1,5 +1,5 @@
 {
-    "name": "@befive/dass",
+    "name": "dass",
     "version": "0.0.1",
     "description": "A decentralized multi workers all in one application framework for JavaScript and TypeScript",
     "main": "dist/index.js",
@@ -12,9 +12,6 @@
         "dist/",
         "readme.md"
     ],
-    "bin": {
-        "dass": "./src/cli/cli.ts"
-    },
     "scripts": {
         "bun:build": "bun build.ts",
         "cli": "bun run src/cli/cli.ts",

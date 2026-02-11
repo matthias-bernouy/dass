@@ -1,5 +1,5 @@
 import type { Schema } from "../../Schema";
-import { mapAndJoin } from "../mapAndJoin";
+import { mapAndJoin } from "../../../../utilities/mapAndJoin";
     
 export function ts_ffi_methods_generator(schema: Schema){
 

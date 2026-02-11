@@ -1,5 +1,5 @@
 import type { Schema } from "../../Schema";
-import { mapAndJoin } from "../mapAndJoin";
+import { mapAndJoin } from "../../../../utilities/mapAndJoin";
 import TEMPLATE_C from "src/.dass-generated/c/C_DOCUMENT_TEMPLATE.c?raw";
 
 

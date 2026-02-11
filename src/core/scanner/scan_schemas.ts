@@ -1,6 +1,6 @@
 import { Schema } from "../schema/Schema";
 
-export async function scannerSchemas(files: string[]): Promise<Schema[]> {
+export async function scan_schemas(files: string[]): Promise<Schema[]> {
     const returnedSchemas: Schema[] = [];
     for (let i = 0; i < files.length; i++) {
         const file = files[i];

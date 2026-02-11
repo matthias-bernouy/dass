@@ -1,16 +1,16 @@
 //{{ROUTES_IMPORTS}}
 
 export type DAASRequest = {
-    headers: Record<string, string>;
-    requestData: Record<string, string>;
-    internalData: Record<string, string>;
-    resourceID: Buffer;
+    readonly standard: Request;
+    readonly headers: Record<string, string>;
+    readonly requestData: Record<string, string>;
+    middlewareData: Record<string, string>;
     transactionID: bigint;
 }
 
 export type DAASResponse = {
     statusCode: number;
-    body?: Buffer;
+    body?: string;
     headers?: Record<string, string>;
 } | void;
 
