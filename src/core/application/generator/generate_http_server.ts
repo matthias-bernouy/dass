@@ -1,15 +1,15 @@
-import SERVER_TEMPLATE from "src/.dass-generated/ts/server.raw?raw" with { type: "text" };
-import { Application } from "../Application";
 import { smartFileWriter } from "src/utilities/smartFileWriter";
-import { join } from "path";
+import { server_path_generated } from "../ApplicationPaths";
+import { get_server_template } from "../templates";
+import { ApplicationObjects } from "../ApplicationObjects";
 
-export async function generate_http_server(application: Application){
+export async function generate_http_server(){
 
-    let template = SERVER_TEMPLATE;
+    let template = get_server_template();
 
     const promises = [];
 
-    const endpoints = await application.scan_endpoints();
+    const endpoints = ApplicationObjects.getEndpoints();
 
     let imports_statement = "";
     let registration_statement = "";
@@ -26,7 +26,7 @@ export async function generate_http_server(application: Application){
 
     promises.push(
         smartFileWriter(
-            join(Application.code_generated_dir, "ts", "server.ts"),
+            server_path_generated(),
             template
         ));
 

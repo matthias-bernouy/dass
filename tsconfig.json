@@ -31,9 +31,9 @@
 	},
 
 	"include": [
-		"src/**/*.ts", 
+		"src/**/*.ts",
 		"__project_template__/**/*.ts", 
-		"__tests__/**/*.ts", "src/.dass-generated/ts/server.raw.ts",
+		"__tests__/**/*.ts", "src/generated/ts/server.raw.ts", "src/generated/ts/ffi_methods.raw.ts",
 	]
 
 }

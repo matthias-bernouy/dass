@@ -1,7 +1,7 @@
-import { Application } from "../application/Application";
 import { smartFileWriter } from "../../utilities/smartFileWriter";
 import { generate_endpoint } from "./generate_endpoint";
 import { join } from "path";
+import { code_generated_dir } from "../application/ApplicationPaths"
 
 /**
  * @param target The target of the endpoint, e.g. "/users"
@@ -11,32 +11,32 @@ import { join } from "path";
  */
 export class Endpoint{
 
-    private target: string;
-    private methods: string[];
+    private target: HttpTarget;
+    private methods: HttpMethod[];
 
-    constructor(target: string, methods: string[]) {
+    constructor(target: HttpTarget, methods: HttpMethod[]) {
         this.target = target;
         this.methods = methods;
     }
 
-    getTarget(): string {
+    getTarget(): HttpTarget {
         return this.target;
     }
 
-    getMethods(): string[] {
+    getMethods(): HttpMethod[] {
         return this.methods;
     }
 
     getFileName(): string {
         let ret = "routes_";
-        ret += this.target.replaceAll("/", "_").replaceAll(":", "_").replaceAll("-", "_");
+        ret += this.target.replaceAll("/", "_").replaceAll(":", "_").replaceAll("-", "_").replaceAll(" ", "_");
         return ret;
     }
 
-    write_endpoint_function(): Promise<void> {
+    async write_endpoint_function(): Promise<void> {
         return smartFileWriter(
-            join(Application.code_generated_dir, "ts", "routes", `${this.getFileName()}.ts`),
-            generate_endpoint(this)
+            join(code_generated_dir(), "ts", "routes", `${this.getFileName()}.ts`),
+            await generate_endpoint(this)
         );
     }
 
@@ -45,7 +45,7 @@ export class Endpoint{
     }
 
     generate_registration_statement(): string {
-        return `...${this.getFileName()}(),`
+        return `\t\t\t...${this.getFileName()}(),`
     }
 
 }

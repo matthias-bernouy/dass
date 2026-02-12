@@ -1,9 +1,10 @@
+import { get_endpoint_template } from "../application/templates";
 import { Endpoint } from "./Endpoint";
-import TEMPLATE_ENDPOINT from "src/.dass-generated/ts/routes/endpoint.raw?raw" with { type: "text" };
+import { generate_endpoint_hooks } from "./generate_endpoints_hooks";
 
-export function generate_endpoint(endpoint: Endpoint): string {
+export async function generate_endpoint(endpoint: Endpoint): Promise<string> {
 
-    let ret = TEMPLATE_ENDPOINT;
+    let ret = get_endpoint_template();
 
     // Step get the method template
     const regexToCaptureMethodTemplate = /(\/\/START_METHODS)(.*?)(\/\/END_METHODS)/s;
@@ -23,12 +24,16 @@ export function generate_endpoint(endpoint: Endpoint): string {
     let methodsCode = "";
     for (const method of endpoint.getMethods()) {
         let methodCode = methodTemplate;
-        methodCode = methodCode.replaceAll("METHOD", method);
+        methodCode = methodCode
+            .replaceAll("METHOD", method)
+            .replace("//BEFORE_CALL_ENDPOINT", `//BEFORE_CALL_ENDPOINT_${method}`)
+            .replace("//AFTER_CALL_ENDPOINT", `//AFTER_CALL_ENDPOINT_${method}`)
         methodsCode += methodCode + "\n";
     }
 
     ret = ret.replace(methodTemplate, methodsCode);
 
+    ret = await generate_endpoint_hooks(ret, endpoint);
 
     return ret
     

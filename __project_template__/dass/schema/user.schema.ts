@@ -1,5 +1,5 @@
-import { Application } from "src/core/application/Application";
 import { Schema } from "src/core/schema/Schema";
+import BeforeUserRegisterHook from "../hooks/BeforeAll";
 
 export function UserSchema(): Schema {
 

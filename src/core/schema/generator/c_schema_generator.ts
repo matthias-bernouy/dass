@@ -1,12 +1,11 @@
-import type { Schema } from "../../Schema";
-import { mapAndJoin } from "../../../../utilities/mapAndJoin";
-import TEMPLATE_C from "src/.dass-generated/c/C_DOCUMENT_TEMPLATE.c?raw";
-
+import type { Schema } from "../Schema";
+import { mapAndJoin } from "../../../utilities/mapAndJoin";
+import { get_template_c } from "src/core/application/templates";
 
 export function c_schema_generator(schema: Schema){
 
     let params, raw_size, create_object, create_raw_data, update_object, update_raw_data;
-    let template = TEMPLATE_C;
+    let template = get_template_c();
 
     // Process base
     let struct = mapAndJoin(schema.getFields(), "\n", f => f.code_generator_c_struct());

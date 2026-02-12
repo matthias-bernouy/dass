@@ -13,7 +13,10 @@
         "readme.md"
     ],
     "scripts": {
+
         "bun:build": "bun build.ts",
+        "generate-types": "tsc",
+        
         "cli": "bun run src/cli/cli.ts",
         "dev": "nodemon --watch resources --watch src --ext ts,c,txt,json,h,md --clear --exec 'clear && bun run __project_template__/App.ts'"
     },

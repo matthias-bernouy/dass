@@ -1,6 +1,5 @@
 import { Field } from "./Field";
 
-
 export class NumberField extends Field {
 
     constructor(fieldName: string) {

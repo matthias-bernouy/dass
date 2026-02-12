@@ -1,92 +1,77 @@
 import path from "path";
-import { Glob } from "bun";
-import { scan_schemas } from "../scanner/scan_schemas";
 import { watch } from "fs";
-import { scan_endpoints } from "../scanner/scan_endpoints";
+import { ApplicationObjects } from "./ApplicationObjects";
+import { code_generated_dir } from "./ApplicationPaths";
 import { generate_http_server } from "./generator/generate_http_server";
 import { generate_schemas } from "./generator/generate_schemas";
 import { generate_structure } from "./generator/generate_structure";
 
-const DEFAULT_CONFIG_FOLDER = "./dass/config";
-const DEFAULT_SCHEMA_FOLDER = "./dass/schema";
-const DEFAULT_ENDPOINT_FOLDER = "./dass/endpoint";
+export const DASS_FOLDER   = "./dass";
+export const DEFAULT_CONFIG_FOLDER   = "./dass/config";
+export const DEFAULT_SCHEMA_FOLDER   = "./dass/schema";
+export const DEFAULT_ENDPOINT_FOLDER = "./dass/endpoint";
+export const DEFAULT_HOOK_FOLDER     = "./dass/hooks";
 
 export class Application {
 
-    private glob: Glob;
     public static cwd: string = process.cwd();
 
-    static get code_generated_dir(): string {
-        return path.join(Application.cwd, "node_modules", ".dass-generated");
-    }
+    static dev(cwd?: string){
 
-    static get types_generated_dir(): string {
-        return path.join(Application.cwd, "node_modules", "@types", ".dass-generated");
-    }
+        
+        if (cwd){
+            Application.cwd = cwd;
+        }
 
-    constructor(cwd?: string) {
-        this.glob = new Glob(`**/*`);
-        Application.cwd = cwd || process.cwd();
-        generate_structure(this);
-    }
+        generate_structure();
 
-    getGlob(): Glob {
-        return this.glob;
-    }
+        let watchSchemas = watch(path.join(Application.cwd, DASS_FOLDER), { recursive: true });
 
-    async scan_endpoints(){
-        const scanRoot = path.join(Application.cwd, DEFAULT_ENDPOINT_FOLDER);
-        const files = Array.from(this.glob.scanSync({
-            cwd: scanRoot,
-            onlyFiles: true,
-            absolute: true
-        }));
-        return await scan_endpoints(files);
-    }
-
-    async scan_schemas(){
-        const scanRoot = path.join(Application.cwd, DEFAULT_SCHEMA_FOLDER);
-        const files = Array.from(this.glob.scanSync({
-            cwd: scanRoot,
-            onlyFiles: true,
-            absolute: true
-        }));
-
-        return await scan_schemas(files);
-    }
-
-    dev(){
-        let w = watch(path.join(Application.cwd, DEFAULT_SCHEMA_FOLDER), { recursive: true });
-
-        w.addListener('change', async () => {
-            await this.build();
-            w = watch(path.join(Application.cwd, DEFAULT_SCHEMA_FOLDER), { recursive: true });
+        watchSchemas.addListener('change', async () => {
+            await Application.build();
+            watchSchemas = watch(path.join(Application.cwd, DASS_FOLDER), { recursive: true });
         });
 
         this.build();
     }
 
-    async build(){
-        const start = Bun.nanoseconds();
+    static async build(){
 
-        const promises = [];
+        let promises;
 
-        promises.push(generate_http_server(this));
-        promises.push(generate_schemas(this));
-
-        await Promise.all(promises);
-
-        Bun.spawnSync(["make", "dev"], {
-            cwd: Application.code_generated_dir,
-            stdout: "inherit",
-            stderr: "inherit",
+        await process_with_timing("Scan resources", async () => {
+            promises = [];
+            promises.push(ApplicationObjects.scan_hook_functions());
+            promises.push(ApplicationObjects.scan_endpoints());
+            promises.push(ApplicationObjects.scan_schemas());
+            await Promise.all(promises);
         })
 
-        const end = Bun.nanoseconds();
-        const duration = (end - start) / 1e6;
-        
-        console.log(`[INFO] Reloading completed in ${duration.toFixed(0)} milliseconds...`);
-        const module = await import(Application.code_generated_dir + "/ts/Server.raw.ts");
-        module.Server();
+        await process_with_timing("Build files", async () => {
+            promises = [];
+            promises.push(generate_http_server());
+            promises.push(generate_schemas());
+            await Promise.all(promises);
+        })
+
+        await process_with_timing("Compiling C library", () => {
+            Bun.spawnSync(["make", "dev"], {
+                cwd: code_generated_dir(),
+                stdout: "ignore",
+                stderr: "ignore",
+            })
+        })
+
+        const module = await import(code_generated_dir() + "/ts/application.ts" + "?u=" + Date.now());
+        module.AppRunner();
     }
+}
+
+async function process_with_timing(str: string, cb: () => Promise<any> | any){
+    let start, end, duration;
+    start = Bun.nanoseconds();
+    await cb();
+    end = Bun.nanoseconds();
+    duration = (end - start) / 1e6;
+    console.log(`[INFO] ${str} in ${duration.toFixed(0)} milliseconds...`);
 }

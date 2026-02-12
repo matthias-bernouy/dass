@@ -1,13 +1,11 @@
-import { existsSync, mkdirSync } from "fs";
 import type { Field } from "./field/Field";
 import { NumberField } from "./field/NumberField";
 import { StringField } from "./field/StringField";
 import path from "path";
-import { Application } from "../application/Application";
-import { c_schema_generator } from "./generator/c/c_schema_generator";
-import { ts_ffi_methods_generator } from "./generator/ts/ts_ffi_methods_generator";
-import { http_methods_generator } from "./generator/ts/http_methods_generator";
+import { c_schema_generator } from "./generator/c_schema_generator";
+import { ts_ffi_methods_generator } from "./generator/ts_ffi_methods_generator";
 import { smartFileWriter } from "../../utilities/smartFileWriter";
+import { code_generated_dir } from "../application/ApplicationPaths";
 
 type SchemaOptions = {
     defaultZone: number;
@@ -63,20 +61,13 @@ export class Schema {
         return "";
     }
 
-    async generate_ts_http_methods(): Promise<void> {
-        return smartFileWriter(
-            path.join(Application.code_generated_dir, "ts", "routes", `${this.name.toLowerCase()}_routes.ts`), 
-            http_methods_generator(this)
-        );
-    }
-
     generate_ts_ffi_methods(): string {
         return ts_ffi_methods_generator(this);
     }
 
     async generate_c(): Promise<void> {
         return smartFileWriter(
-            path.join(Application.code_generated_dir, "c", `${this.name.toLowerCase()}.c`), 
+            path.join(code_generated_dir(), "c", `${this.name.toLowerCase()}.c`), 
             c_schema_generator(this)
         );
     }

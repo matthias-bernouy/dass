@@ -1,5 +1,3 @@
-
-
 export abstract class Field {
 
     protected fieldName: string;

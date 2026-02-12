@@ -1,7 +1,6 @@
 import { Application } from "src/core/application/Application";
+import { HookRegistry } from "./dass/config/HookRegistry";
 
-console.log("STARTING APP...")
+HookRegistry();
 
-const app = new Application(__dirname);
-
-app.dev();
+Application.dev(__dirname);
