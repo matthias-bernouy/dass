@@ -17,8 +17,6 @@ export class Application {
     public static cwd: string = process.cwd();
 
     static dev(cwd?: string){
-
-        
         if (cwd){
             Application.cwd = cwd;
         }
@@ -62,8 +60,9 @@ export class Application {
             })
         })
 
-        const module = await import(code_generated_dir() + "/ts/application.ts" + "?u=" + Date.now());
+        const module = await import(code_generated_dir() + "/ts/application.ts" + `?update=${Date.now()}`);
         module.AppRunner();
+        // PRBLM when new scan
     }
 }
 

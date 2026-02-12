@@ -16,24 +16,25 @@
 		"noUncheckedIndexedAccess": true,
 		"noImplicitOverride": true,
 
+		"sourceMap": true,
+
 		"declaration": true,
 		"emitDeclarationOnly": true,
 		"declarationMap": false,
 
 		"paths": {
-			"@resources/*": ["resources/*"],
+			"@resources/*": ["src/resources/*"],
 			"@generated/*": ["node_modules/.dass-generated/*"]
 		},
 
-		"rootDir": ".",
-		"baseUrl": ".",
-		"outDir": "dist/"
+		"outDir": "dist",
+		"rootDir": "src",
+		"baseUrl": "."
 	},
 
 	"include": [
 		"src/**/*.ts",
-		"__project_template__/**/*.ts", 
-		"__tests__/**/*.ts", "src/generated/ts/server.raw.ts", "src/generated/ts/ffi_methods.raw.ts",
+		"src/resources/**/*.ts"
 	]
 
 }

@@ -1,13 +1,18 @@
+import { mkdir, cp } from "node:fs/promises";
 
+(async () => {
 
+    await Bun.build({
+        entrypoints: [ "src/index.ts" ],
+        outdir: "dist",
+        target: "bun",
+        loader: {
+            ".c": "text"
+        }
+    })
 
-Bun.build({
-    entrypoints: [ "src/core/application/Application.ts" ],
-    outdir: "dist",
-    loader: {
-        ".raw.ts": "text",
-        ".raw?raw": "text",
-        ".raw.ts?raw": "text",
-    },
-    target: "bun"
-})
+    await mkdir("dist/src/resources", { recursive: true });
+    await cp("src/resources", "dist/src/resources", { recursive: true });
+
+})()
+

@@ -1,0 +1,34 @@
+{
+	"compilerOptions": {
+		"lib": ["ESNext"],
+		"target": "ESNext",
+		"module": "Preserve",
+		"moduleDetection": "force",
+		"moduleResolution": "bundler",
+
+		"allowJs": true,
+		"verbatimModuleSyntax": true,
+		"esModuleInterop": true,
+
+		"strict": true,
+		"skipLibCheck": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"declarationMap": false,
+
+		"outDir": "dist",
+		"rootDir": ".",
+		"baseUrl": "."
+	},
+
+	"include": [
+		"src/**/*.ts",
+		"dass/**/*.ts",
+        "App.ts"
+	]
+
+}

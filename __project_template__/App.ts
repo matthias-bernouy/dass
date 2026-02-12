@@ -1,5 +1,5 @@
-import { Application } from "src/core/application/Application";
 import { HookRegistry } from "./dass/config/HookRegistry";
+import { Application } from "dass"
 
 HookRegistry();
 

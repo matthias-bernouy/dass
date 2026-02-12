@@ -3,7 +3,7 @@ import { Application } from "./Application";
 import { join } from "path";
 
 export function get_dass_generated_dir_source(): string {
-    return join(library_dir, "src", "generated");
+    return join(library_dir, "src", "resources", "generated");
 }
 
 export function c_build_path(): string {

@@ -3,17 +3,14 @@
     "version": "0.0.1",
     "description": "A decentralized multi workers all in one application framework for JavaScript and TypeScript",
     "main": "dist/index.js",
-    "types": "dist/types/index.d.ts",
-    "exports": {
-        ".": {},
-        "./types": "./node_modules/.dass-generated/Blabla.d.ts"
-    },
+    "types": "dist/index.d.ts",
     "files": [
         "dist/",
-        "readme.md"
+        "resources/"
     ],
     "scripts": {
 
+        "build:clear": "rm -r dist/",
         "bun:build": "bun build.ts",
         "generate-types": "tsc",
         

@@ -1,6 +1,4 @@
-import { Endpoint } from "src/core/endpoint/Endpoint";
-
-export function AccountEndpoints(): Endpoint[] {
+export function AccountEndpoints(): EndPoint[] {
     
     return [
         new Endpoint("/login/:id", ["POST", "GET"]),

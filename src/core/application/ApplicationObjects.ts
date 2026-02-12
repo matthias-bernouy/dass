@@ -93,6 +93,7 @@ export class ApplicationObjects {
 
     static async scan_hook_functions(){
         ApplicationObjects.HookFunctions.clear();
+        console.log(ApplicationObjects.HookFunctions.size)
         const directory_to_scan = path.join(Application.cwd, DEFAULT_HOOK_FOLDER);
         const files = Array.from(ApplicationObjects.glob.scanSync({
             cwd: directory_to_scan,

@@ -1,4 +1,3 @@
-import { Schema } from "src/core/schema/Schema";
 import BeforeUserRegisterHook from "../hooks/BeforeAll";
 
 export function UserSchema(): Schema {
