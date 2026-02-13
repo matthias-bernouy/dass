@@ -21,7 +21,7 @@ export function AppRunner(){
 
     function stop () {
         for (let i = 0; i < nbWorkers; i++) {
-            workers[i]?.terminate();
+            workers[i]?.postMessage("terminate");
         }
     }
 

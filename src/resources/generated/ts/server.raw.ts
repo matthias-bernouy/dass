@@ -3,7 +3,7 @@
 const threadid = Math.random().toString(16).substring(2, 10);
 
 export function Server(){
-    Bun.serve({
+    return Bun.serve({
         port: 3000,
         reusePort: true,
         fetch(request) {

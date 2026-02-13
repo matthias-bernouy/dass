@@ -14,6 +14,7 @@ export const DEFAULT_HOOK_FOLDER     = "./dass/hooks";
 
 export class Application {
 
+    private static lastRunner: Function | undefined;
     public static cwd: string = process.cwd();
 
     static dev(cwd?: string){
@@ -34,7 +35,9 @@ export class Application {
     }
 
     static async build(){
-
+        if (Application.lastRunner){
+            Application.lastRunner.call([])
+        }
         let promises;
 
         await process_with_timing("Scan resources", async () => {
@@ -61,8 +64,8 @@ export class Application {
         })
 
         const module = await import(code_generated_dir() + "/ts/application.ts" + `?update=${Date.now()}`);
-        module.AppRunner();
-        // PRBLM when new scan
+        const stop = module.AppRunner().stop;
+        Application.lastRunner = stop;
     }
 }
 

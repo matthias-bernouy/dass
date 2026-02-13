@@ -16,6 +16,7 @@ export function generate_structure(){
     // }));
 
     cpSync(join(resources_dir, "c"), join(code_generated_dir(), "c"), { recursive: true });
+    cpSync(join(resources_dir, "c_prebuild"), join(code_generated_dir(), "c_prebuild"), { recursive: true });
 
     // for (let i = 0; i < files.length; i++) {
     //     smartCopy(files[i]!, join(code_generated_dir(), "c", relative(join(get_dass_generated_dir_source(), "c"), files[i]!)));
