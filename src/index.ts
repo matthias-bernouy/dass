@@ -1,13 +1,11 @@
+import { BunRunner } from "./Runner/BunRunner";
+import { Be5System } from "./Be5System";
 
-export * from "./core/application/Application";
 
-export * from "./core/endpoint/Endpoint";
+const system = new Be5System(BunRunner);
 
-export * from "./core/hooks/Hook";
+system.register_endpoint("/test", "GET", (req: Request) => {
+    return new Response("Hello World")
+})
 
-export * from "./core/schema/Schema";
-
-export * from "./core/hooks/register_hook";
-
-export * from "./types/global"
-
+system.start();

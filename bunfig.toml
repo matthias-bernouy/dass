@@ -1,6 +1,0 @@
-[runtime]
-watchIgnore = [
-  "node_modules/.dass-generated/**",
-  "__project_template__/**",
-  "resources/**"
-]

@@ -23,8 +23,7 @@
 		"declarationMap": false,
 
 		"paths": {
-			"@resources/*": ["src/resources/*"],
-			"@generated/*": ["node_modules/.dass-generated/*"]
+			"@resources/*": ["src/resources/*"]
 		},
 
 		"outDir": "dist",
@@ -33,8 +32,7 @@
 	},
 
 	"include": [
-		"src/**/*.ts",
-		"src/resources/**/*.ts"
+		"src/**/*.ts"
 	]
 
 }
