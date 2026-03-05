@@ -1,4 +1,4 @@
-import type { RunnerInterface } from "./Runner/RunnerInterface";
+import type { RunnerInterface } from "./runner/RunnerInterface";
 
 type HTTPMethodsEnum = [
     "POST",
@@ -15,7 +15,7 @@ export type RestEndpointsType = {
     },
 }
 
-type RunnerConstructor = new (system: Be5System) => RunnerInterface;
+export type RunnerConstructor = new (system: Be5System) => RunnerInterface;
 
 export class Be5System {
     private runner: RunnerInterface;
@@ -25,7 +25,7 @@ export class Be5System {
         this.runner = new runner(this);
     }
 
-    getRestEndpoints(){
+    getEndpoints(){
         return this.restEndpoints;
     }
 
@@ -33,7 +33,7 @@ export class Be5System {
 
     }
 
-    register_endpoint(path: string, method: HTTPMethods, cb: HTTPTarget){
+    registerEndpoint(path: string, method: HTTPMethods, cb: HTTPTarget){
         if (!this.restEndpoints[path]) {
             this.restEndpoints[path] = {};
         }

@@ -1,7 +1,5 @@
 import type { Be5System } from "../Be5System";
 
-
-
 export abstract class RunnerInterface{
 
     protected system: Be5System;

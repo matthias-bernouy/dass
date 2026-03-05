@@ -1,11 +1,6 @@
-import { BunRunner } from "./Runner/BunRunner";
-import { Be5System } from "./Be5System";
+export * from "./Be5System";
 
+export * from "./runner/BunRunner"
 
-const system = new Be5System(BunRunner);
-
-system.register_endpoint("/test", "GET", (req: Request) => {
-    return new Response("Hello World")
-})
-
-system.start();
+export * from "./response/send_html"
+export * from "./response/send_js"

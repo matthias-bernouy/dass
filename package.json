@@ -1,7 +1,7 @@
 {
-    "name": "dass",
+    "name": "be5-system",
     "version": "0.0.1",
-    "description": "A decentralized multi workers all in one application framework for JavaScript and TypeScript",
+    "description": "",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
@@ -10,13 +10,15 @@
     ],
     "scripts": {
         "build:clear": "rm -r dist/",
-        "bun:build": "bun build.ts"
+        "bun:build": "bun src/build.ts",
+        "generate-types": "tsc"
     },
+    
     "devDependencies": {
         "@types/bun": "latest",
-        "bun-types": "^1.3.6",
-        "nodemon": "^3.1.11"
+        "bun-types": "^1.3.6"
     },
+
     "peerDependencies": {
         "typescript": "^5.9.3"
     }

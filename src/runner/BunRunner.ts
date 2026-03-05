@@ -2,7 +2,6 @@ import type { Be5System } from "src/Be5System";
 import { RunnerInterface } from "./RunnerInterface";
 import type { Server } from "bun";
 
-
 export class BunRunner extends RunnerInterface {
 
     private server: Server<any> | null = null;
@@ -13,13 +12,13 @@ export class BunRunner extends RunnerInterface {
 
     start(){
         this.server = Bun.serve({
-            routes: this.system.getRestEndpoints()
+            routes: this.system.getEndpoints()
         })
     }
 
     reload(){
         this.server?.reload({
-            routes: this.system.getRestEndpoints()
+            routes: this.system.getEndpoints()
         })
     }
 
