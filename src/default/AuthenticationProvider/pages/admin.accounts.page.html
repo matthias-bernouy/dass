@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des comptes | Be5</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.875rem;
+            font-weight: 700;
+        }
+
+        .logout-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .logout-link:hover { color: var(--text); }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #0f172a;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .role-admin { background-color: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .role-user  { background-color: rgba(99, 102, 241, 0.2); color: #818cf8; }
+
+        button, select {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+
+        button:hover { background-color: var(--primary-hover); }
+
+        button.danger { background-color: var(--danger); }
+        button.danger:hover { background-color: var(--danger-hover); }
+
+        select {
+            background-color: #0f172a;
+            border: 1px solid var(--border);
+        }
+
+        .empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .create-card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .create-card h2 {
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .create-form {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr auto;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .create-form input,
+        .create-form select {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            background-color: #0f172a;
+            color: white;
+            font-size: 0.875rem;
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        .create-form button {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.875rem;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Gestion des comptes</h1>
+            <a class="logout-link" href="./logout">Déconnexion</a>
+        </header>
+
+        <div class="create-card">
+            <h2>Créer un compte</h2>
+            <form class="create-form" id="createForm">
+                <input type="email" id="newEmail" placeholder="nom@exemple.com" required>
+                <input type="password" id="newPassword" placeholder="Mot de passe" required minlength="8">
+                <select id="newRole">
+                    <option value="user">user</option>
+                    <option value="admin">admin</option>
+                </select>
+                <button type="submit">Créer</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>Créé le</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                    <tr><td colspan="4" class="empty">Chargement…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function load() {
+            const res = await fetch('./api/accounts');
+            if (!res.ok) {
+                document.getElementById('tbody').innerHTML =
+                    '<tr><td colspan="4" class="empty">Erreur : ' + res.status + '</td></tr>';
+                return;
+            }
+            const accounts = await res.json();
+            const tbody = document.getElementById('tbody');
+            if (!accounts.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty">Aucun compte</td></tr>';
+                return;
+            }
+            tbody.innerHTML = accounts.map(a => {
+                const created = a.createdAt ? new Date(a.createdAt).toLocaleString() : '—';
+                const roleClass = a.role === 'admin' ? 'role-admin' : 'role-user';
+                return `
+                    <tr data-identifier="${a.identifier}">
+                        <td>${a.identifier}</td>
+                        <td><span class="role-badge ${roleClass}">${a.role}</span></td>
+                        <td>${created}</td>
+                        <td>
+                            <select class="role-select">
+                                <option value="user" ${a.role === 'user' ? 'selected' : ''}>user</option>
+                                <option value="admin" ${a.role === 'admin' ? 'selected' : ''}>admin</option>
+                            </select>
+                            <button class="save-btn">Enregistrer</button>
+                            <button class="danger delete-btn">Supprimer</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.querySelectorAll('tr').forEach(row => {
+                const identifier = row.dataset.identifier;
+                row.querySelector('.save-btn').addEventListener('click', async () => {
+                    const role = row.querySelector('.role-select').value;
+                    const res = await fetch('./api/accounts', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ identifier, role }),
+                    });
+                    if (!res.ok) alert('Erreur : ' + await res.text());
+                    else load();
+                });
+                row.querySelector('.delete-btn').addEventListener('click', async () => {
+                    if (!confirm('Supprimer ' + identifier + ' ?')) return;
+                    const res = await fetch('./api/accounts', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ identifier }),
+                    });
+                    if (!res.ok) alert('Erreur : ' + await res.text());
+                    else load();
+                });
+            });
+        }
+
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const identifier = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPassword').value;
+            const role = document.getElementById('newRole').value;
+            const res = await fetch('./api/accounts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ identifier, password, role }),
+            });
+            if (!res.ok) {
+                alert('Erreur : ' + await res.text());
+            } else {
+                document.getElementById('createForm').reset();
+                load();
+            }
+        });
+
+        load();
+    </script>
+</body>
+
+</html>
