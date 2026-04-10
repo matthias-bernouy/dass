@@ -1,4 +1,4 @@
-import type { Be5_MailMessage, IBe5_Mailer } from "../../interfaces/MailerInterface";
+import type { Be5_MailMessage, Mailer } from "../../interfaces/Mailer";
 
 /**
  * Default mailer used for development and tests.
@@ -6,7 +6,7 @@ import type { Be5_MailMessage, IBe5_Mailer } from "../../interfaces/MailerInterf
  * It does not actually send anything — it just prints the message to stdout.
  * Useful to inspect password reset links without configuring SMTP.
  */
-export class ConsoleMailerProvider implements IBe5_Mailer {
+export class ConsoleMailerProvider implements Mailer {
 
     private readonly defaultFrom: string;
 

@@ -1,10 +1,10 @@
 import { compare } from "bcryptjs";
 import { SignJWT } from "jose";
-import type { Authentication } from "../Authentication";
+import type { Be5_Authentication } from "../Be5_Authentication";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
-export async function loginSubmit(req: Request, system: Authentication) {
+export async function loginSubmit(req: Request, system: Be5_Authentication) {
     try {
         const { email, password } = await req.json() as any;
 

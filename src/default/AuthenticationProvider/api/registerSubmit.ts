@@ -1,8 +1,8 @@
 import { hash } from "bcryptjs";
-import type { Authentication } from "../Authentication";
-import { signAuthJwt } from "../Authentication";
+import type { Be5_Authentication } from "../Be5_Authentication";
+import { signAuthJwt } from "../Be5_Authentication";
 
-export async function registerSubmit(req: Request, system: Authentication): Promise<Response> {
+export async function registerSubmit(req: Request, system: Be5_Authentication): Promise<Response> {
     try {
         const count = await system.repository.count();
 

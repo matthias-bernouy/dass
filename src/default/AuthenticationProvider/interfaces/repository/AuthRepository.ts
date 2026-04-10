@@ -12,6 +12,19 @@ export type TSubject = {
     passwordResetExpiresAt?: Date | null;
 }
 
+/**
+ * An API token persisted by the repository. Only the sha256 hash of the raw
+ * secret is stored — the raw token is never retrievable after creation.
+ */
+export type TAuthToken = {
+    id: string;
+    userEmail: string;
+    tokenHash: string;
+    name?: string;
+    createdAt: Date;
+    expiresAt: Date;
+}
+
 export interface AuthRepository {
 
     findByEmail(email: string): Promise<TSubject | null>;
@@ -28,5 +41,12 @@ export interface AuthRepository {
     delete(email: string): Promise<void>;
     list(): Promise<TSubject[]>;
     count(): Promise<number>;
+
+    // ── API tokens ───────────────────────────────────────────────────────
+    createToken(token: TAuthToken): Promise<void>;
+    findTokenByHash(tokenHash: string): Promise<TAuthToken | null>;
+    listTokensForUser(userEmail: string): Promise<TAuthToken[]>;
+    deleteTokenById(id: string): Promise<void>;
+    deleteTokensForUser(userEmail: string): Promise<void>;
 
 }

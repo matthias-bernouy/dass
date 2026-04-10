@@ -1,7 +1,7 @@
 import { join } from "node:path";
-import type { IBe5_Runner, RouteHandler, Middleware } from "src/interfaces/RunnerInterface";
+import type { Runner, RouteHandler, Middleware } from "../interfaces/Runner";
 
-export class Be5_Runner implements IBe5_Runner {
+export class Be5_Runner implements Runner {
     private routes: Array<{
         method: string;
         path: string;
@@ -26,12 +26,12 @@ export class Be5_Runner implements IBe5_Runner {
         this.globalMiddlewares.push(middleware);
     }
 
-    group(prefix: string, callback: (runner: IBe5_Runner) => void, middlewares: Middleware[] = []) {
+    group(prefix: string, callback: (runner: Runner) => void, middlewares: Middleware[] = []) {
 
         const currentPrefix = (prefix).replace(/\/+/g, "/");
         const currentMiddlewares = middlewares;
 
-        const scopedRunner: IBe5_Runner = {
+        const scopedRunner: Runner = {
             ...this,
             addEndpoint: (method, path, handler, middleware = []) => {
                 this.addEndpoint(method, currentPrefix + path, handler, [...currentMiddlewares, ...middleware]);

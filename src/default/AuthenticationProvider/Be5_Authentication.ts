@@ -2,9 +2,17 @@ import { compare, hash } from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { join } from "node:path";
 
-import type { IBe5_AccountSummary, IBe5_Authentication, IBe5_Subject } from "../../interfaces/AuthInterface";
-import type { IBe5_Runner, Middleware } from "../../interfaces/RunnerInterface";
-import type { IBe5_Mailer } from "../../interfaces/MailerInterface";
+import type { AccountSummary, Subject } from "../../interfaces/Subject";
+import type { Authentication } from "../../interfaces/Authentication";
+import type { PasswordAuthentication } from "../../interfaces/PasswordAuthentication";
+import type {
+    CreateTokenOptions,
+    CreateTokenResult,
+    TokenAuthentication,
+    TokenSummary,
+} from "../../interfaces/TokenAuthentication";
+import type { Runner, Middleware } from "../../interfaces/Runner";
+import type { Mailer } from "../../interfaces/Mailer";
 import type { AuthRepository } from "./interfaces/repository/AuthRepository";
 
 import { loginSubmit } from "./api/loginSubmit";
@@ -15,6 +23,7 @@ import { resetSubmit } from "./api/resetSubmit";
 import { setupSubmit } from "./api/setupSubmit";
 import { changePasswordSubmit } from "./api/changePasswordSubmit";
 import { adminListAccounts, adminCreateAccount, adminDeleteAccount, adminUpdateRole } from "./api/adminAccounts";
+import { listMyTokens, createMyToken, deleteMyToken } from "./api/tokens";
 
 import loginPage from "./pages/login.page.html" with { type: "text" };
 import registerPage from "./pages/register.page.html" with { type: "text" };
@@ -23,6 +32,7 @@ import setupPage from "./pages/setup.page.html" with { type: "text" };
 import recoverPage from "./pages/recover.page.html" with { type: "text" };
 import resetPage from "./pages/reset.page.html" with { type: "text" };
 import adminAccountsPage from "./pages/admin.accounts.page.html" with { type: "text" };
+import tokensPageHtml from "./pages/tokens.page.html" with { type: "text" };
 
 import { send_html } from "./utilities/send_html";
 
@@ -49,7 +59,7 @@ export type AuthConfig = {
      * Optional mailer. If omitted, email-dependent features
      * (requestPasswordReset) throw and the HTTP routes return 503.
      */
-    mailer?: IBe5_Mailer;
+    mailer?: Mailer;
 
     /** Lifetime of a password reset token in minutes. Defaults to 30. */
     resetTokenTtlMinutes?: number;
@@ -60,13 +70,13 @@ export type AuthConfig = {
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
-export class Authentication implements IBe5_Authentication {
+export class Be5_Authentication implements Authentication, PasswordAuthentication, TokenAuthentication {
 
     public registerDisabled: boolean;
     public defaultRedirection: string;
 
     private _repository: AuthRepository;
-    private _mailer: IBe5_Mailer | null;
+    private _mailer: Mailer | null;
     private _baseUrl: string | null;
     private _resetTtlMs: number;
     private _mailFrom: string | undefined;
@@ -79,8 +89,9 @@ export class Authentication implements IBe5_Authentication {
     public readonly logoutPage: string;
     public readonly setupPage: string;
     public readonly adminAccountsPage: string;
+    public readonly tokensPage: string;
 
-    constructor(repository: AuthRepository, runner: IBe5_Runner, config?: AuthConfig) {
+    constructor(repository: AuthRepository, runner: Runner, config?: AuthConfig) {
 
         this._repository = repository;
         this._mailer = config?.mailer ?? null;
@@ -108,6 +119,7 @@ export class Authentication implements IBe5_Authentication {
         this.logoutPage = join(this._basePath, "logout");
         this.setupPage = join(this._basePath, "setup");
         this.adminAccountsPage = join(this._basePath, "admin/accounts");
+        this.tokensPage = join(this._basePath, "tokens");
 
         runner.group(this._basePath, (r) => {
             // ── existing flow ────────────────────────────────────────────
@@ -162,6 +174,13 @@ export class Authentication implements IBe5_Authentication {
             r.post("/admin/api/accounts", (req) => adminCreateAccount(req, this), adminGuard);
             r.delete("/admin/api/accounts", (req) => adminDeleteAccount(req, this), adminGuard);
             r.patch("/admin/api/accounts", (req) => adminUpdateRole(req, this), adminGuard);
+
+            // ── API tokens (self-service, authenticated user) ────────────
+            const authGuard = [this.requireAuthenticated];
+            r.get("/tokens", () => send_html(tokensPageHtml as unknown as string), authGuard);
+            r.get("/api/tokens", (req) => listMyTokens(req, this), authGuard);
+            r.post("/api/tokens", (req) => createMyToken(req, this), authGuard);
+            r.delete("/api/tokens", (req) => deleteMyToken(req, this), authGuard);
         });
     }
 
@@ -177,7 +196,18 @@ export class Authentication implements IBe5_Authentication {
 
     // ── subject / guards ─────────────────────────────────────────────────
 
-    async getSubject(req: Request): Promise<IBe5_Subject | null> {
+    async getSubject(req: Request): Promise<Subject | null> {
+        // 1. API token via Authorization: Bearer <token>
+        const authHeader = req.headers.get("authorization");
+        if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
+            const raw = authHeader.slice(7).trim();
+            if (raw) {
+                const subject = await this._subjectFromApiToken(raw);
+                if (subject) return subject;
+            }
+        }
+
+        // 2. Session JWT via the Be5Credentials cookie
         const cookieHeader = req.headers.get("cookie");
         if (!cookieHeader) return null;
 
@@ -199,18 +229,29 @@ export class Authentication implements IBe5_Authentication {
         }
     }
 
+    private async _subjectFromApiToken(rawToken: string): Promise<Subject | null> {
+        const tokenHash = await sha256Hex(rawToken);
+        const record = await this._repository.findTokenByHash(tokenHash);
+        if (!record) return null;
+        if (new Date(record.expiresAt).getTime() <= Date.now()) return null;
+
+        const user = await this._repository.findByEmail(record.userEmail);
+        if (!user) return null;
+        return { identifier: user.email, role: user.role };
+    }
+
     async isAuthenticated(req: Request): Promise<boolean> {
         const subject = await this.getSubject(req);
         return subject !== null;
     }
 
-    async guardAuthenticated(req: Request): Promise<IBe5_Subject> {
+    async guardAuthenticated(req: Request): Promise<Subject> {
         const subject = await this.getSubject(req);
         if (!subject) throw new Error("AuthenticationError: Access Denied");
         return subject;
     }
 
-    async guardAdmin(req: Request): Promise<IBe5_Subject> {
+    async guardAdmin(req: Request): Promise<Subject> {
         const subject = await this.guardAuthenticated(req);
         if (subject.role !== "admin") throw new Error("AuthorizationError: Admin role required");
         return subject;
@@ -313,7 +354,7 @@ export class Authentication implements IBe5_Authentication {
 
     // ── admin ────────────────────────────────────────────────────────────
 
-    async listAccounts(): Promise<IBe5_AccountSummary[]> {
+    async listAccounts(): Promise<AccountSummary[]> {
         const accounts = await this._repository.list();
         return accounts.map(a => ({
             identifier: a.email,
@@ -322,7 +363,7 @@ export class Authentication implements IBe5_Authentication {
         }));
     }
 
-    async createAccount(identifier: string, password: string, role: "admin" | "user"): Promise<IBe5_Subject> {
+    async createAccount(identifier: string, password: string, role: "admin" | "user"): Promise<Subject> {
         if (!identifier || !password) throw new Error("Email and password are required");
         const existing = await this._repository.findByEmail(identifier);
         if (existing) throw new Error("User already exists");
@@ -342,6 +383,9 @@ export class Authentication implements IBe5_Authentication {
             throw new Error("Cannot delete the last admin account");
         }
         await this._repository.delete(identifier);
+        // Revoke every API token owned by the account so stale secrets can't
+        // outlive their user.
+        await this._repository.deleteTokensForUser(identifier);
     }
 
     async setAccountRole(identifier: string, role: "admin" | "user"): Promise<void> {
@@ -357,6 +401,55 @@ export class Authentication implements IBe5_Authentication {
         const accounts = await this._repository.list();
         return accounts.filter(a => a.role === "admin").length;
     }
+
+    // ── API tokens ───────────────────────────────────────────────────────
+
+    async createToken(identifier: string, options: CreateTokenOptions): Promise<CreateTokenResult> {
+        if (!identifier) throw new Error("Identifier is required");
+        if (!Number.isFinite(options.expiresInMinutes) || options.expiresInMinutes <= 0) {
+            throw new Error("expiresInMinutes must be a positive number");
+        }
+
+        const user = await this._repository.findByEmail(identifier);
+        if (!user) throw new Error("Account not found");
+
+        const raw = generateOpaqueToken();
+        const tokenHash = await sha256Hex(raw);
+        const id = crypto.randomUUID();
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + options.expiresInMinutes * 60 * 1000);
+
+        await this._repository.createToken({
+            id,
+            userEmail: user.email,
+            tokenHash,
+            name: options.name,
+            createdAt: now,
+            expiresAt,
+        });
+
+        return { id, token: raw, expiresAt };
+    }
+
+    async listTokens(identifier: string): Promise<TokenSummary[]> {
+        const records = await this._repository.listTokensForUser(identifier);
+        return records.map(r => ({
+            id: r.id,
+            identifier: r.userEmail,
+            name: r.name,
+            createdAt: r.createdAt,
+            expiresAt: r.expiresAt,
+        }));
+    }
+
+    async deleteToken(id: string): Promise<void> {
+        if (!id) throw new Error("Token id is required");
+        await this._repository.deleteTokenById(id);
+    }
+
+    tokenAuthHeaders(token: string): Record<string, string> {
+        return { Authorization: `Bearer ${token}` };
+    }
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────
@@ -365,6 +458,14 @@ function generateResetToken(): string {
     const bytes = new Uint8Array(32);
     crypto.getRandomValues(bytes);
     return Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function generateOpaqueToken(): string {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    const hex = Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
+    // "be5_" prefix makes tokens recognizable in logs / secret scanners.
+    return `be5_${hex}`;
 }
 
 async function sha256Hex(input: string): Promise<string> {

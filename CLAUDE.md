@@ -19,20 +19,24 @@ There is no test runner, lint config, or dev/watch script wired up in `package.j
 
 Two layers, both re-exported from `src/index.ts`:
 
-1. **`src/interfaces/`** — pure TypeScript contracts with no runtime code:
-   - `RunnerInterface.ts` — `IBe5_Runner` (HTTP server abstraction: `addEndpoint`, `use`, `group`, verb helpers, `start`) plus `RouteHandler` and `Middleware` types built on the Web `Request`/`Response` API.
-   - `AuthInterface.ts` — `IBe5_Authentication` and `IBe5_Subject` (`identifier`, `role`).
-   - `MediaInterface` is re-exported from `src/index.ts` but the file does not yet exist on this branch — expect to add it when touching media.
+1. **`src/interfaces/`** — pure TypeScript contracts with no runtime code, one interface per file:
+   - `Runner.ts` — `Runner` (HTTP server abstraction: `addEndpoint`, `use`, `group`, verb helpers, `start`) plus `RouteHandler` and `Middleware` types built on the Web `Request`/`Response` API.
+   - `Subject.ts` — `Subject` (`identifier`, `role`) and `AccountSummary` (adds `createdAt`).
+   - `Authentication.ts` — core auth contract: subject/guards/middlewares, `logout`, and admin account management. Strategy-agnostic.
+   - `PasswordAuthentication.ts` — capability interface: `createAccount`, `changePassword`, `requestPasswordReset`, `resetPassword`, plus the `loginPage`/`registerPage`/`recoverPage`/`resetPage`/`setupPage` string paths and `mailEnabled`.
+   - `Mailer.ts` — `Mailer` + `Be5_MailMessage`.
 
 2. **`src/default/`** — reference implementations of those interfaces:
-   - `RunnerProvider.ts` — `Be5_Runner implements IBe5_Runner`, backed by `Bun.serve`. Groups compose middleware and prefix via a scoped proxy object. Path matching is a simple segment comparison with `:param` wildcards (no regex, no query parsing).
-   - `AuthenticationProvider/Authentication.ts` — `Authentication implements IBe5_Authentication`. On construction it registers its own routes onto an injected `IBe5_Runner` under `config.basePath` (default `/auth`): `login`, `register`, `loginSubmit`, `registerSubmit`. JWT is verified with `jose` (HS256) from the `Be5Credentials` cookie; `JWT_SECRET` comes from `process.env`. Login/register HTML pages are imported at build time via Bun's `with { type: "text" }` text-module attribute and have a `defaultRedirect` placeholder string-replaced at construction.
-   - `AuthenticationProvider/interfaces/repository/AuthRepository.ts` — the storage contract (`findByEmail`, `register`, `count`) plus the `TSubject` shape.
+   - `RunnerProvider.ts` — `Be5_Runner implements Runner`, backed by `Bun.serve`. Groups compose middleware and prefix via a scoped proxy object. Path matching is a simple segment comparison with `:param` wildcards (no regex, no query parsing).
+   - `AuthenticationProvider/Be5_Authentication.ts` — `Be5_Authentication implements Authentication, PasswordAuthentication`. On construction it registers its own routes onto an injected `Runner` under `config.basePath` (default `/auth`): `login`, `register`, `loginSubmit`, `registerSubmit`, plus recover/reset/setup/admin routes. JWT is verified with `jose` (HS256) from the `Be5Credentials` cookie; `JWT_SECRET` comes from `process.env`. Login/register HTML pages are imported at build time via Bun's `with { type: "text" }` text-module attribute and have a `defaultRedirect` placeholder string-replaced at construction.
+   - `AuthenticationProvider/interfaces/repository/AuthRepository.ts` — the storage contract (`findByEmail`, `register`, `count`, ...) plus the `TSubject` shape.
    - `AuthenticationProvider/interfaces/default-provider/AuthRepositoryProvider.ts` — MongoDB-backed implementation of `AuthRepository`; `AuthRepositoryProvider.create({ uri, databaseName })` is the async factory.
 
 Key architectural points that are not obvious from a single file:
 
-- **The runner is injected into the auth provider**, not the other way around. `new Authentication(repo, runner, config)` mutates the runner by calling `runner.group(...)`. Any new default provider that exposes HTTP routes should follow this same pattern.
+- **Capability interfaces, not one god interface**: the core `Authentication` contract only covers what every auth strategy needs (subject, guards, logout, admin). Strategy-specific features live in sibling capability interfaces (`PasswordAuthentication` today; `TokenAuthentication`/`OAuthAuthentication` planned). A provider implements whichever capabilities it supports and consumers type against `Authentication & PasswordAuthentication` when they need password flows.
+- **Naming convention**: interfaces are plain PascalCase (`Runner`, `Authentication`, `Mailer`). Default classes are prefixed `Be5_` (`Be5_Runner`, `Be5_Authentication`) to avoid colliding with their contracts — this is the reason the class is `Be5_Authentication` and not `Authentication`.
+- **The runner is injected into the auth provider**, not the other way around. `new Be5_Authentication(repo, runner, config)` mutates the runner by calling `runner.group(...)`. Any new default provider that exposes HTTP routes should follow this same pattern.
 - **HTML pages live next to the provider** (`pages/*.page.html`) and are imported as text modules. This only works under Bun; if you ever need to run under plain Node you will need a loader shim.
 - **`Be5_Runner.group` uses a scoped proxy object**, not a sub-runner class. When adding runner features, remember to also expose them on the scoped object returned inside `group`, otherwise nested groups will silently lose the new capability.
 - **`noUncheckedIndexedAccess` and `strict` are on** in `tsconfig.json`, and `verbatimModuleSyntax` is enforced — always use `import type` for type-only imports.

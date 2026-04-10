@@ -1,6 +1,6 @@
-import type { Authentication } from "../Authentication";
+import type { Be5_Authentication } from "../Be5_Authentication";
 
-export async function recoverSubmit(req: Request, system: Authentication): Promise<Response> {
+export async function recoverSubmit(req: Request, system: Be5_Authentication): Promise<Response> {
     try {
         if (!system.mailEnabled) {
             return new Response("Password recovery is disabled on this server", { status: 503 });

@@ -17,6 +17,6 @@ export type Be5_MailMessage = {
  * to email the user (password reset, etc.) are disabled when no mailer is
  * supplied.
  */
-export interface IBe5_Mailer {
+export interface Mailer {
     send(message: Be5_MailMessage): Promise<void>;
 }

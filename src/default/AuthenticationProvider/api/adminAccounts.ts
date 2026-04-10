@@ -1,6 +1,6 @@
-import type { Authentication } from "../Authentication";
+import type { Be5_Authentication } from "../Be5_Authentication";
 
-export async function adminListAccounts(_req: Request, system: Authentication): Promise<Response> {
+export async function adminListAccounts(_req: Request, system: Be5_Authentication): Promise<Response> {
     try {
         const accounts = await system.listAccounts();
         return new Response(JSON.stringify(accounts), {
@@ -13,7 +13,7 @@ export async function adminListAccounts(_req: Request, system: Authentication): 
     }
 }
 
-export async function adminCreateAccount(req: Request, system: Authentication): Promise<Response> {
+export async function adminCreateAccount(req: Request, system: Be5_Authentication): Promise<Response> {
     try {
         const { identifier, password, role } = await req.json() as {
             identifier?: string;
@@ -35,7 +35,7 @@ export async function adminCreateAccount(req: Request, system: Authentication): 
     }
 }
 
-export async function adminDeleteAccount(req: Request, system: Authentication): Promise<Response> {
+export async function adminDeleteAccount(req: Request, system: Be5_Authentication): Promise<Response> {
     try {
         // The requireAdmin middleware already validated the caller.
         const current = await system.getSubject(req);
@@ -62,7 +62,7 @@ export async function adminDeleteAccount(req: Request, system: Authentication): 
     }
 }
 
-export async function adminUpdateRole(req: Request, system: Authentication): Promise<Response> {
+export async function adminUpdateRole(req: Request, system: Be5_Authentication): Promise<Response> {
     try {
         const current = await system.getSubject(req);
         if (!current) return new Response("Unauthorized", { status: 401 });

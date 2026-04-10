@@ -7,7 +7,7 @@
  * Requires a running MongoDB on localhost:27017 (or set MONGO_URI).
  */
 import { Be5_Runner } from "./default/RunnerProvider";
-import { Authentication } from "./default/AuthenticationProvider/Authentication";
+import { Be5_Authentication } from "./default/AuthenticationProvider/Be5_Authentication";
 import { AuthRepositoryProvider } from "./default/AuthenticationProvider/interfaces/default-provider/AuthRepositoryProvider";
 import { ConsoleMailerProvider } from "./default/MailerProvider/ConsoleMailerProvider";
 // import { SmtpMailerProvider } from "./default/MailerProvider/SmtpMailerProvider";
@@ -19,7 +19,7 @@ async function main() {
     // 2. Repository (MongoDB) ────────────────────────────────────────────
     const repository = await AuthRepositoryProvider.create({
         uri: process.env.MONGO_URI ?? "mongodb://localhost:27017",
-        databaseName: "azerazeazerazer",
+        databaseName: "nbu-auth-demo",
     });
 
     // 3. Mailer — console for dev, SMTP in prod ──────────────────────────
@@ -32,7 +32,7 @@ async function main() {
     // });
 
     // 4. Authentication — mailer is optional; omit it to disable reset ──
-    const auth = new Authentication(repository, runner, {
+    const auth = new Be5_Authentication(repository, runner, {
         basePath: "/auth",
         baseUrl: "http://localhost:3000",
         defaultRedirection: "/dashboard",
