@@ -1,6 +1,6 @@
-import type { Be5_Authentication } from "../Be5_Authentication";
+import type { DefaultAuthentication } from "../DefaultAuthentication";
 
-export async function resetSubmit(req: Request, system: Be5_Authentication): Promise<Response> {
+export async function resetSubmit(req: Request, system: DefaultAuthentication): Promise<Response> {
     try {
         const { token, password } = await req.json() as { token?: string; password?: string };
 

@@ -1,6 +1,6 @@
-import type { Be5_Authentication } from "../Be5_Authentication";
+import type { DefaultAuthentication } from "../DefaultAuthentication";
 
-export async function listMyTokens(req: Request, system: Be5_Authentication): Promise<Response> {
+export async function listMyTokens(req: Request, system: DefaultAuthentication): Promise<Response> {
     try {
         const subject = await system.getSubject(req);
         if (!subject) return new Response("Unauthorized", { status: 401 });
@@ -15,7 +15,7 @@ export async function listMyTokens(req: Request, system: Be5_Authentication): Pr
     }
 }
 
-export async function createMyToken(req: Request, system: Be5_Authentication): Promise<Response> {
+export async function createMyToken(req: Request, system: DefaultAuthentication): Promise<Response> {
     try {
         const subject = await system.getSubject(req);
         if (!subject) return new Response("Unauthorized", { status: 401 });
@@ -43,7 +43,7 @@ export async function createMyToken(req: Request, system: Be5_Authentication): P
     }
 }
 
-export async function deleteMyToken(req: Request, system: Be5_Authentication): Promise<Response> {
+export async function deleteMyToken(req: Request, system: DefaultAuthentication): Promise<Response> {
     try {
         const subject = await system.getSubject(req);
         if (!subject) return new Response("Unauthorized", { status: 401 });

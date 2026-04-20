@@ -1,4 +1,4 @@
-import type { Be5_MailMessage, Mailer } from "../../interfaces/Mailer";
+import type { MailMessage, Mailer } from "./Mailer";
 
 /**
  * Default mailer used for development and tests.
@@ -6,7 +6,7 @@ import type { Be5_MailMessage, Mailer } from "../../interfaces/Mailer";
  * It does not actually send anything — it just prints the message to stdout.
  * Useful to inspect password reset links without configuring SMTP.
  */
-export class ConsoleMailerProvider implements Mailer {
+export class DefaultConsoleMailer implements Mailer {
 
     private readonly defaultFrom: string;
 
@@ -14,7 +14,7 @@ export class ConsoleMailerProvider implements Mailer {
         this.defaultFrom = defaultFrom;
     }
 
-    async send(message: Be5_MailMessage): Promise<void> {
+    async send(message: MailMessage): Promise<void> {
         const from = message.from ?? this.defaultFrom;
         console.log("───── ConsoleMailer ─────");
         console.log(`From:    ${from}`);

@@ -1,7 +1,7 @@
 /**
  * A single outbound email message.
  */
-export type Be5_MailMessage = {
+export type MailMessage = {
     to: string;
     subject: string;
     html: string;
@@ -18,5 +18,5 @@ export type Be5_MailMessage = {
  * supplied.
  */
 export interface Mailer {
-    send(message: Be5_MailMessage): Promise<void>;
+    send(message: MailMessage): Promise<void>;
 }

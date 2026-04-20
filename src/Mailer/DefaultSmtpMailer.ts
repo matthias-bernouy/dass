@@ -1,4 +1,4 @@
-import type { Be5_MailMessage, Mailer } from "../../interfaces/Mailer";
+import type { MailMessage, Mailer } from "./Mailer";
 
 export type SmtpMailerConfig = {
     host: string;
@@ -15,9 +15,9 @@ export type SmtpMailerConfig = {
  * SMTP-backed mailer built on top of nodemailer.
  *
  * Nodemailer is imported dynamically so that consumers who only use the
- * ConsoleMailerProvider don't pay the cost of pulling it in.
+ * DefaultConsoleMailer don't pay the cost of pulling it in.
  */
-export class SmtpMailerProvider implements Mailer {
+export class DefaultSmtpMailer implements Mailer {
 
     private readonly config: SmtpMailerConfig;
     private _transporter: any | null = null;
@@ -34,7 +34,7 @@ export class SmtpMailerProvider implements Mailer {
         const nodemailer: any = await import("nodemailer");
         const createTransport = nodemailer.createTransport ?? nodemailer.default?.createTransport;
         if (!createTransport) {
-            throw new Error("SmtpMailerProvider: failed to load nodemailer.createTransport");
+            throw new Error("DefaultSmtpMailer: failed to load nodemailer.createTransport");
         }
         this._transporter = createTransport({
             host: this.config.host,
@@ -45,7 +45,7 @@ export class SmtpMailerProvider implements Mailer {
         return this._transporter;
     }
 
-    async send(message: Be5_MailMessage): Promise<void> {
+    async send(message: MailMessage): Promise<void> {
         const t = await this.transporter();
         await t.sendMail({
             from: message.from ?? this.config.defaultFrom,

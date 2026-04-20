@@ -1,5 +1,5 @@
 import { Collection, Db, MongoClient } from "mongodb";
-import type { AuthRepository, TAuthToken, TSubject } from "../repository/AuthRepository";
+import type { AuthRepository, TAuthToken, TSubject } from "./AuthRepository";
 
 type DefaultDatastoreConfig = {
     uri: string;
@@ -9,7 +9,7 @@ type DefaultDatastoreConfig = {
 /**
  * Default MongoDB-backed implementation of AuthRepository.
  */
-export class AuthRepositoryProvider implements AuthRepository {
+export class DefaultAuthRepository implements AuthRepository {
 
     private _database: Db;
     private _accountCollection: Collection<TSubject>;
@@ -21,9 +21,9 @@ export class AuthRepositoryProvider implements AuthRepository {
         this._tokenCollection = this._database.collection<TAuthToken>("auth_tokens");
     }
 
-    static async create(config: DefaultDatastoreConfig): Promise<AuthRepositoryProvider> {
+    static async create(config: DefaultDatastoreConfig): Promise<DefaultAuthRepository> {
         const client = await new MongoClient(config.uri).connect();
-        const instance = new AuthRepositoryProvider(client, config.databaseName);
+        const instance = new DefaultAuthRepository(client, config.databaseName);
 
         // Token indexes: unique lookup by hash, per-user listing, and a TTL
         // index so Mongo auto-reaps expired tokens in the background.

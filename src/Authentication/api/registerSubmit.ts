@@ -1,8 +1,7 @@
 import { hash } from "bcryptjs";
-import type { Be5_Authentication } from "../Be5_Authentication";
-import { signAuthJwt } from "../Be5_Authentication";
+import type { DefaultAuthentication } from "../DefaultAuthentication";
 
-export async function registerSubmit(req: Request, system: Be5_Authentication): Promise<Response> {
+export async function registerSubmit(req: Request, system: DefaultAuthentication): Promise<Response> {
     try {
         const count = await system.repository.count();
 
@@ -33,15 +32,13 @@ export async function registerSubmit(req: Request, system: Be5_Authentication): 
             role: 'user',
         });
 
-        // Auto-login: sign a JWT and set the cookie so the client lands on
-        // the dashboard as the freshly-created user instead of whoever was
-        // logged in before.
-        const jwt = await signAuthJwt({
+        // Auto-login: sign a session JWT so the client lands on the dashboard
+        // as the freshly-created user instead of whoever was logged in before.
+        const cookie = await system.issueSessionCookie({
             email: subject.email,
-            sub: subject.id ?? subject.email,
             role: subject.role,
+            id: subject.id,
         });
-        const cookie = `Be5Credentials=${jwt}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=7200`;
 
         return new Response(
             JSON.stringify({ message: "User registered successfully" }),

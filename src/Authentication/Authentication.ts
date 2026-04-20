@@ -1,4 +1,4 @@
-import type { Middleware } from "./Runner";
+import type { Middleware } from "../Runner/Runner";
 import type { AccountSummary, Subject } from "./Subject";
 
 /**

@@ -45,5 +45,5 @@ export interface Runner {
     /** Helper for quick PUT route registration */
     put(path: string, handler: RouteHandler, middlewares?: Middleware[]): void;
 
-    start(): void;
+    start(port?: number): void;
 }

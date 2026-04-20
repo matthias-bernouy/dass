@@ -1,6 +1,6 @@
-import type { Be5_Authentication } from "../Be5_Authentication";
+import type { DefaultAuthentication } from "../DefaultAuthentication";
 
-export async function changePasswordSubmit(req: Request, system: Be5_Authentication): Promise<Response> {
+export async function changePasswordSubmit(req: Request, system: DefaultAuthentication): Promise<Response> {
     try {
         const { currentPassword, newPassword } = await req.json() as {
             currentPassword?: string;

@@ -1,19 +1,18 @@
 import { compare, hash } from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
-import { join } from "node:path";
 
-import type { AccountSummary, Subject } from "../../interfaces/Subject";
-import type { Authentication } from "../../interfaces/Authentication";
-import type { PasswordAuthentication } from "../../interfaces/PasswordAuthentication";
+import type { AccountSummary, Subject } from "./Subject";
+import type { Authentication } from "./Authentication";
+import type { PasswordAuthentication } from "./PasswordAuthentication";
 import type {
     CreateTokenOptions,
     CreateTokenResult,
     TokenAuthentication,
     TokenSummary,
-} from "../../interfaces/TokenAuthentication";
-import type { Runner, Middleware } from "../../interfaces/Runner";
-import type { Mailer } from "../../interfaces/Mailer";
-import type { AuthRepository } from "./interfaces/repository/AuthRepository";
+} from "./TokenAuthentication";
+import type { Runner, Middleware } from "../Runner/Runner";
+import type { Mailer } from "../Mailer/Mailer";
+import type { AuthRepository } from "./AuthRepository";
 
 import { loginSubmit } from "./api/loginSubmit";
 import { registerSubmit } from "./api/registerSubmit";
@@ -34,9 +33,9 @@ import resetPage from "./pages/reset.page.html" with { type: "text" };
 import adminAccountsPage from "./pages/admin.accounts.page.html" with { type: "text" };
 import tokensPageHtml from "./pages/tokens.page.html" with { type: "text" };
 
-import { send_html } from "./utilities/send_html";
+import { sendHtml } from "./utilities/sendHtml";
 
-interface Be5_TokenPayload {
+interface TokenPayload {
     email: string;
     role: "admin" | "user";
     sub: string;
@@ -52,8 +51,18 @@ export type AuthConfig = {
      * Required for features that embed links in emails. If absent, reset
      * links fall back to a relative URL (which may not be clickable in mail
      * clients but still works for dev).
+     *
+     * Also drives the default value of the `Secure` cookie attribute: over
+     * plain `http://` the browser silently drops `Secure` cookies, so the
+     * session would never stick on a local dev server.
      */
     baseUrl?: string;
+
+    /**
+     * Forces the `Secure` cookie attribute on/off. Defaults to auto-detection
+     * from `baseUrl` (`https://` → true, `http://` → false, unset → true).
+     */
+    cookieSecure?: boolean;
 
     /**
      * Optional mailer. If omitted, email-dependent features
@@ -68,9 +77,22 @@ export type AuthConfig = {
     mailFrom?: string;
 };
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+const SESSION_MAX_AGE_SECONDS = 7200;
+const SESSION_COOKIE_NAME = "Be5Credentials";
 
-export class Be5_Authentication implements Authentication, PasswordAuthentication, TokenAuthentication {
+function loadJwtSecret(): Uint8Array {
+    const raw = process.env.JWT_SECRET;
+    if (!raw) {
+        throw new Error("JWT_SECRET environment variable is required for DefaultAuthentication");
+    }
+    return new TextEncoder().encode(raw);
+}
+
+function joinUrlPath(a: string, b: string): string {
+    return ("/" + a + "/" + b).replace(/\/+/g, "/");
+}
+
+export class DefaultAuthentication implements Authentication, PasswordAuthentication, TokenAuthentication {
 
     public registerDisabled: boolean;
     public defaultRedirection: string;
@@ -81,6 +103,8 @@ export class Be5_Authentication implements Authentication, PasswordAuthenticatio
     private _resetTtlMs: number;
     private _mailFrom: string | undefined;
     private _basePath: string;
+    private _cookieSecure: boolean;
+    private _jwtSecret: Uint8Array;
 
     public readonly loginPage: string;
     public readonly registerPage: string;
@@ -93,15 +117,24 @@ export class Be5_Authentication implements Authentication, PasswordAuthenticatio
 
     constructor(repository: AuthRepository, runner: Runner, config?: AuthConfig) {
 
+        this._jwtSecret = loadJwtSecret();
         this._repository = repository;
         this._mailer = config?.mailer ?? null;
         this._baseUrl = config?.baseUrl ?? null;
         this._resetTtlMs = (config?.resetTokenTtlMinutes ?? 30) * 60 * 1000;
         this._mailFrom = config?.mailFrom;
         this._basePath = config?.basePath || "/auth";
+        this._cookieSecure = config?.cookieSecure ?? detectCookieSecure(this._baseUrl);
 
-        let htmlLoginPage = (loginPage as unknown as string).replace('defaultRedirect = "/"', `defaultRedirect = "${config?.defaultRedirection || "/"}";`);
-        const htmlRegisterPage = (registerPage as unknown as string).replace('defaultRedirect = "/"', `defaultRedirect = "${config?.defaultRedirection || "/"}";`);
+        const redirectLiteral = JSON.stringify(config?.defaultRedirection || "/");
+        let htmlLoginPage = (loginPage as unknown as string).replace(
+            'const defaultRedirect = "/";',
+            `const defaultRedirect = ${redirectLiteral};`
+        );
+        const htmlRegisterPage = (registerPage as unknown as string).replace(
+            'const defaultRedirect = "/";',
+            `const defaultRedirect = ${redirectLiteral};`
+        );
 
         // Strip the "forgot password" link when no mailer is configured,
         // otherwise clicking it would land on a 503.
@@ -112,21 +145,20 @@ export class Be5_Authentication implements Authentication, PasswordAuthenticatio
         this.registerDisabled = config?.registerDisabled || false;
         this.defaultRedirection = config?.defaultRedirection || "/";
 
-        this.loginPage = join(this._basePath, "login");
-        this.registerPage = join(this._basePath, "register");
-        this.recoverPage = join(this._basePath, "recover");
-        this.resetPage = join(this._basePath, "reset");
-        this.logoutPage = join(this._basePath, "logout");
-        this.setupPage = join(this._basePath, "setup");
-        this.adminAccountsPage = join(this._basePath, "admin/accounts");
-        this.tokensPage = join(this._basePath, "tokens");
+        this.loginPage = joinUrlPath(this._basePath, "login");
+        this.registerPage = joinUrlPath(this._basePath, "register");
+        this.recoverPage = joinUrlPath(this._basePath, "recover");
+        this.resetPage = joinUrlPath(this._basePath, "reset");
+        this.logoutPage = joinUrlPath(this._basePath, "logout");
+        this.setupPage = joinUrlPath(this._basePath, "setup");
+        this.adminAccountsPage = joinUrlPath(this._basePath, "admin/accounts");
+        this.tokensPage = joinUrlPath(this._basePath, "tokens");
 
         runner.group(this._basePath, (r) => {
-            // ── existing flow ────────────────────────────────────────────
             r.post("/loginSubmit", (req) => loginSubmit(req, this));
             r.post("/registerSubmit", (req) => registerSubmit(req, this));
 
-            r.get("/login", () => send_html(htmlLoginPage));
+            r.get("/login", () => sendHtml(htmlLoginPage));
             r.get("/register", async () => {
                 const count = await this._repository.count();
                 // No account yet → force the first-run setup flow.
@@ -134,53 +166,48 @@ export class Be5_Authentication implements Authentication, PasswordAuthenticatio
                     return new Response(null, { status: 302, headers: { Location: this.setupPage } });
                 }
                 if (this.registerDisabled) {
-                    return send_html(disabledPage as unknown as string);
+                    return sendHtml(disabledPage as unknown as string);
                 }
-                return send_html(htmlRegisterPage);
+                return sendHtml(htmlRegisterPage);
             });
 
-            // ── logout ───────────────────────────────────────────────────
             r.get("/logout", (req) => logoutHandler(req, this));
 
-            // ── first-run setup (only reachable while DB is empty) ───────
+            // First-run setup (only reachable while DB is empty)
             r.get("/setup", async () => {
                 const count = await this._repository.count();
                 if (count > 0) return new Response("Setup already completed", { status: 404 });
-                return send_html(setupPage as unknown as string);
+                return sendHtml(setupPage as unknown as string);
             });
             r.post("/setupSubmit", (req) => setupSubmit(req, this));
 
-            // ── password recovery (mailer-gated) ─────────────────────────
             r.get("/recover", () => {
                 if (!this._mailer) {
                     return new Response("Password recovery is disabled on this server", { status: 503 });
                 }
-                return send_html(recoverPage as unknown as string);
+                return sendHtml(recoverPage as unknown as string);
             });
             r.post("/recoverSubmit", (req) => recoverSubmit(req, this));
 
-            r.get("/reset", () => send_html(resetPage as unknown as string));
+            r.get("/reset", () => sendHtml(resetPage as unknown as string));
             r.post("/resetSubmit", (req) => resetSubmit(req, this));
 
-            // ── change password (authenticated user) ─────────────────────
             r.post("/changePasswordSubmit", (req) => changePasswordSubmit(req, this), [this.requireAuthenticated]);
 
-            // ── admin area (admin-only) ──────────────────────────────────
-            // Middleware is applied per-route because the runner's nested-group
-            // middleware merging is currently lossy.
-            const adminGuard = [this.requireAdmin];
-            r.get("/admin/accounts", () => send_html(adminAccountsPage as unknown as string), adminGuard);
-            r.get("/admin/api/accounts", (req) => adminListAccounts(req, this), adminGuard);
-            r.post("/admin/api/accounts", (req) => adminCreateAccount(req, this), adminGuard);
-            r.delete("/admin/api/accounts", (req) => adminDeleteAccount(req, this), adminGuard);
-            r.patch("/admin/api/accounts", (req) => adminUpdateRole(req, this), adminGuard);
+            r.group("/admin", (admin) => {
+                admin.get("/accounts", () => sendHtml(adminAccountsPage as unknown as string));
+                admin.get("/api/accounts", (req) => adminListAccounts(req, this));
+                admin.post("/api/accounts", (req) => adminCreateAccount(req, this));
+                admin.delete("/api/accounts", (req) => adminDeleteAccount(req, this));
+                admin.patch("/api/accounts", (req) => adminUpdateRole(req, this));
+            }, [this.requireAdmin]);
 
-            // ── API tokens (self-service, authenticated user) ────────────
-            const authGuard = [this.requireAuthenticated];
-            r.get("/tokens", () => send_html(tokensPageHtml as unknown as string), authGuard);
-            r.get("/api/tokens", (req) => listMyTokens(req, this), authGuard);
-            r.post("/api/tokens", (req) => createMyToken(req, this), authGuard);
-            r.delete("/api/tokens", (req) => deleteMyToken(req, this), authGuard);
+            r.group("/", (user) => {
+                user.get("/tokens", () => sendHtml(tokensPageHtml as unknown as string));
+                user.get("/api/tokens", (req) => listMyTokens(req, this));
+                user.post("/api/tokens", (req) => createMyToken(req, this));
+                user.delete("/api/tokens", (req) => deleteMyToken(req, this));
+            }, [this.requireAuthenticated]);
         });
     }
 
@@ -192,6 +219,31 @@ export class Be5_Authentication implements Authentication, PasswordAuthenticatio
 
     get mailEnabled(): boolean {
         return this._mailer !== null;
+    }
+
+    // ── session cookies ──────────────────────────────────────────────────
+
+    /**
+     * Signs a session JWT for the given subject and returns the full
+     * `Set-Cookie` value handlers should attach to their Response.
+     */
+    async issueSessionCookie(args: { email: string; role: "admin" | "user"; id?: string }): Promise<string> {
+        const jwt = await new SignJWT({ email: args.email, sub: args.id ?? args.email, role: args.role })
+            .setProtectedHeader({ alg: "HS256" })
+            .setIssuedAt()
+            .setExpirationTime("24h")
+            .sign(this._jwtSecret);
+        return this._buildSessionCookie(jwt, SESSION_MAX_AGE_SECONDS);
+    }
+
+    /** Returns a `Set-Cookie` value that clears the session cookie. */
+    clearSessionCookie(): string {
+        return this._buildSessionCookie("", 0);
+    }
+
+    private _buildSessionCookie(value: string, maxAgeSeconds: number): string {
+        const secure = this._cookieSecure ? " Secure;" : "";
+        return `${SESSION_COOKIE_NAME}=${value}; HttpOnly;${secure} SameSite=Strict; Path=/; Max-Age=${maxAgeSeconds}`;
     }
 
     // ── subject / guards ─────────────────────────────────────────────────
@@ -207,21 +259,22 @@ export class Be5_Authentication implements Authentication, PasswordAuthenticatio
             }
         }
 
-        // 2. Session JWT via the Be5Credentials cookie
+        // 2. Session JWT via the session cookie
         const cookieHeader = req.headers.get("cookie");
         if (!cookieHeader) return null;
 
+        const cookiePrefix = `${SESSION_COOKIE_NAME}=`;
         const token = cookieHeader
             .split(";")
             .map(c => c.trim())
-            .find(c => c.startsWith("Be5Credentials="))
-            ?.split("=")[1];
+            .find(c => c.startsWith(cookiePrefix))
+            ?.slice(cookiePrefix.length);
 
         if (!token) return null;
 
         try {
-            const { payload } = await jwtVerify(token, JWT_SECRET, { algorithms: ["HS256"] });
-            const data = payload as unknown as Be5_TokenPayload;
+            const { payload } = await jwtVerify(token, this._jwtSecret, { algorithms: ["HS256"] });
+            const data = payload as unknown as TokenPayload;
             return { identifier: data.email, role: data.role };
         } catch (error) {
             console.error("JWT Verification failed:", error instanceof Error ? error.message : error);
@@ -285,7 +338,13 @@ export class Be5_Authentication implements Authentication, PasswordAuthenticatio
     // ── logout ───────────────────────────────────────────────────────────
 
     logout(): Response {
-        return logoutHandler(new Request("http://localhost"), this);
+        return new Response(null, {
+            status: 302,
+            headers: {
+                "Set-Cookie": this.clearSessionCookie(),
+                "Location": this.loginPage,
+            },
+        });
     }
 
     // ── password recovery ────────────────────────────────────────────────
@@ -454,6 +513,15 @@ export class Be5_Authentication implements Authentication, PasswordAuthenticatio
 
 // ── helpers ──────────────────────────────────────────────────────────────
 
+function detectCookieSecure(baseUrl: string | null): boolean {
+    if (!baseUrl) return true;
+    try {
+        return new URL(baseUrl).protocol === "https:";
+    } catch {
+        return true;
+    }
+}
+
 function generateResetToken(): string {
     const bytes = new Uint8Array(32);
     crypto.getRandomValues(bytes);
@@ -472,13 +540,4 @@ async function sha256Hex(input: string): Promise<string> {
     const data = new TextEncoder().encode(input);
     const digest = await crypto.subtle.digest("SHA-256", data);
     return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
-}
-
-/** Convenience factory: produces a signed JWT for use by login handlers. */
-export async function signAuthJwt(payload: Be5_TokenPayload): Promise<string> {
-    return await new SignJWT({ email: payload.email, sub: payload.sub, role: payload.role })
-        .setProtectedHeader({ alg: "HS256" })
-        .setIssuedAt()
-        .setExpirationTime("24h")
-        .sign(JWT_SECRET);
 }

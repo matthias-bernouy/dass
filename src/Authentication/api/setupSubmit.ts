@@ -1,11 +1,11 @@
 import { hash } from "bcryptjs";
-import type { Be5_Authentication } from "../Be5_Authentication";
+import type { DefaultAuthentication } from "../DefaultAuthentication";
 
 /**
  * Creates the very first admin account.
  * 409 if any account already exists — this endpoint is meant to run exactly once.
  */
-export async function setupSubmit(req: Request, system: Be5_Authentication): Promise<Response> {
+export async function setupSubmit(req: Request, system: DefaultAuthentication): Promise<Response> {
     try {
         const count = await system.repository.count();
         if (count > 0) {

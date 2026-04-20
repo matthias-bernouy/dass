@@ -1,7 +1,14 @@
-import { join } from "node:path";
-import type { Runner, RouteHandler, Middleware } from "../interfaces/Runner";
+import type { Runner, RouteHandler, Middleware } from "./Runner";
 
-export class Be5_Runner implements Runner {
+function urlJoin(...parts: string[]): string {
+    return ("/" + parts.join("/")).replace(/\/+/g, "/") || "/";
+}
+
+function normalizePath(p: string): string {
+    return p.length > 1 && p.endsWith("/") ? p.slice(0, -1) : p;
+}
+
+export class DefaultRunner implements Runner {
     private routes: Array<{
         method: string;
         path: string;
@@ -12,13 +19,11 @@ export class Be5_Runner implements Runner {
     private globalMiddlewares: Middleware[] = [];
 
     addEndpoint(method: string, path: string, handler: RouteHandler, middlewares: Middleware[] = []): void {
-        const fullPath = (path).replace(/\/+/g, "/") || "/";
-
         this.routes.push({
             method,
-            path: fullPath,
+            path: urlJoin(path),
             handler,
-            middlewares: middlewares,
+            middlewares,
         });
     }
 
@@ -28,22 +33,22 @@ export class Be5_Runner implements Runner {
 
     group(prefix: string, callback: (runner: Runner) => void, middlewares: Middleware[] = []) {
 
-        const currentPrefix = (prefix).replace(/\/+/g, "/");
+        const currentPrefix = urlJoin(prefix);
         const currentMiddlewares = middlewares;
 
         const scopedRunner: Runner = {
             ...this,
             addEndpoint: (method, path, handler, middleware = []) => {
-                this.addEndpoint(method, currentPrefix + path, handler, [...currentMiddlewares, ...middleware]);
+                this.addEndpoint(method, urlJoin(currentPrefix, path), handler, [...currentMiddlewares, ...middleware]);
             },
             get: (p, h, m) => scopedRunner.addEndpoint('GET', p, h, m),
             post: (p, h, m) => scopedRunner.addEndpoint('POST', p, h, m),
             put: (p, h, m) => scopedRunner.addEndpoint('PUT', p, h, m),
             delete: (p, h, m) => scopedRunner.addEndpoint('DELETE', p, h, m),
             patch: (p, h, m) => scopedRunner.addEndpoint('PATCH', p, h, m),
-            
-            group: (p, c, m) => {
-                this.group(join(currentPrefix, p), c, [...currentMiddlewares, ...middlewares])
+
+            group: (p, c, m = []) => {
+                this.group(urlJoin(currentPrefix, p), c, [...currentMiddlewares, ...m]);
             }
         };
 
@@ -64,9 +69,10 @@ export class Be5_Runner implements Runner {
             async fetch(request) {
                 const url = new URL(request.url);
                 const method = request.method;
+                const pathname = normalizePath(url.pathname);
 
                 const route = self.routes.find(r =>
-                    r.method === method && self.matchPath(r.path, url.pathname)
+                    r.method === method && self.matchPath(r.path, pathname)
                 );
 
                 if (!route) {
@@ -97,9 +103,10 @@ export class Be5_Runner implements Runner {
     }
 
     private matchPath(routePath: string, requestPath: string): boolean {
-        if (routePath === requestPath) return true;
+        const route = normalizePath(routePath);
+        if (route === requestPath) return true;
 
-        const routeParts = routePath.split('/');
+        const routeParts = route.split('/');
         const requestParts = requestPath.split('/');
 
         if (routeParts.length !== requestParts.length) return false;
