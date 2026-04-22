@@ -1,63 +1,69 @@
 /**
- * Demo wiring of the Be5 auth stack.
+ * Demo wiring of the new Be5 auth contract with a Keycloak-backed consumer.
  *
- * Run with:
- *   JWT_SECRET=dev-secret bun examples/app.ts
+ * Prereqs:
+ *   1. `docker compose -f src/Keycloak/docker-compose.yml up -d` (Keycloak + Postgres + Mailhog).
+ *   2. In Keycloak admin console (http://localhost:8080), create a realm
+ *      "aelf1er", a confidential client "cms" with:
+ *         - Valid redirect URIs:           http://localhost:3000/auth/callback
+ *         - Valid post-logout redirect URIs: http://localhost:3000/auth/post-logout-callback
+ *      plus at least one user with the `admin` realm role.
+ *   3. Copy the client secret into SESSION_SECRET below or an env var.
  *
- * Requires a running MongoDB on localhost:27017 (or set MONGO_URI).
+ * Run:
+ *   bun examples/app.ts
  */
 import { DefaultRunner } from "../src/Runner/DefaultRunner";
-import { DefaultAuthentication } from "../src/Authentication/DefaultAuthentication";
-import { DefaultAuthRepository } from "../src/Authentication/DefaultAuthRepository";
-import { DefaultConsoleMailer } from "../src/Mailer/DefaultConsoleMailer";
-// import { DefaultSmtpMailer } from "../src/Mailer/DefaultSmtpMailer";
+import { KeycloakAuthenticationConsumer } from "../src/Authentication/consumers/KeycloakAuthenticationConsumer";
+
+const PORT = 3000;
+const APP_BASE_URL = `http://localhost:${PORT}`;
 
 async function main() {
     const runner = new DefaultRunner();
 
-    const repository = await DefaultAuthRepository.create({
-        uri: process.env.MONGO_URI ?? "mongodb://localhost:27017",
-        databaseName: "nbu-auth-demo",
-    });
-
-    const mailer = new DefaultConsoleMailer("no-reply@be5.local");
-
-    const auth = new DefaultAuthentication(repository, runner, {
+    const auth = new KeycloakAuthenticationConsumer(runner, {
+        issuer: process.env.KEYCLOAK_ISSUER ?? "http://localhost:8080/realms/aelf1er",
+        clientId: process.env.KEYCLOAK_CLIENT_ID ?? "cms",
+        clientSecret: process.env.KEYCLOAK_CLIENT_SECRET ?? "change-me",
+        appBaseUrl: APP_BASE_URL,
         basePath: "/auth",
-        baseUrl: "http://localhost:3000",
-        defaultRedirection: "/dashboard",
-        mailer,
-        mailFrom: "no-reply@be5.local",
-        resetTokenTtlMinutes: 30,
+        sessionSecret: process.env.SESSION_SECRET ?? "dev-only-session-secret-please-override-in-prod",
+        sessionTtlSeconds: 3600,
+        defaultReturnTo: "/",
     });
 
-    runner.get("/", () => new Response("👋 Be5 demo. Try /auth/login, /auth/setup, /dashboard"));
-
-    runner.get("/dashboard", async (req) => {
+    runner.get("/", async (req) => {
         const subject = await auth.getSubject(req);
+        const who = subject ? `${subject.displayName ?? subject.identifier} (${subject.role})` : "anonymous";
         return new Response(
-            `Hello ${subject?.identifier} (${subject?.role}). ` +
-            `Admin panel: ${auth.adminAccountsPage} — Logout: ${auth.logoutPage}`,
-            { headers: { "Content-Type": "text/plain" } }
+            `<h1>Be5 demo app</h1>
+             <p>Session: ${who}</p>
+             <p>
+               <a href="/protected">Protected</a> ·
+               <a href="${auth.loginUrl}">Login</a> ·
+               <a href="${auth.logoutUrl}">Logout</a> ·
+               <a href="${auth.profileUrl}">Keycloak profile</a>
+             </p>`,
+            { headers: { "Content-Type": "text/html; charset=utf-8" } },
         );
-    }, [auth.requireAuthenticated]);
-
-    runner.get("/secret-stats", async () => {
-        const accounts = await auth.listAccounts();
-        return Response.json({ total: accounts.length, accounts });
-    }, [auth.requireAdmin]);
-
-    runner.get("/private", async (req) => {
-        if (!(await auth.isAuthenticated(req))) {
-            return Response.redirect(auth.withRedirect(auth.loginPage, "/private"), 302);
-        }
-        return new Response("Private area");
     });
 
-    runner.start();
+    runner.get("/protected", async (req) => {
+        const subject = await auth.getSubject(req);
+        console.log(subject)
+        if (!subject) {
+            const returnTo = new URL(req.url).pathname + new URL(req.url).search;
+            return new Response(null, { status: 302, headers: { Location: auth.buildLoginUrl(returnTo) } });
+        }
+        return Response.json({ ok: true, subject });
+    });
+
+    runner.start(PORT);
+    console.log(`Demo app on ${APP_BASE_URL}`);
 }
 
-main().catch(err => {
-    console.error("Failed to start demo:", err);
+main().catch((e) => {
+    console.error(e);
     process.exit(1);
 });

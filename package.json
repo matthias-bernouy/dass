@@ -14,7 +14,8 @@
         }
     },
     "scripts": {
-        "bun:build": "bun build.ts"
+        "bun:build": "bun build.ts",
+        "test": "bun test"
     },
     "devDependencies": {
         "@types/bun": "latest",

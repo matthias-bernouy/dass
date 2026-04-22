@@ -2,14 +2,13 @@
 export * from "./Runner/Runner";
 export * from "./Runner/DefaultRunner";
 
-// Authentication
-export * from "./Authentication/Subject";
-export * from "./Authentication/Authentication";
-export * from "./Authentication/PasswordAuthentication";
-export * from "./Authentication/TokenAuthentication";
-export * from "./Authentication/AuthRepository";
-export * from "./Authentication/DefaultAuthentication";
-export * from "./Authentication/DefaultAuthRepository";
+// Authentication — contracts
+export * from "./Authentication/interfaces/Authentication";
+export * from "./Authentication/interfaces/AuthenticationConsumer";
+export * from "./Authentication/interfaces/ApiTokens";
+
+// Keycloak — OIDC consumer
+export * from "./Authentication/consumers/KeycloakAuthenticationConsumer";
 
 // Mailer
 export * from "./Mailer/Mailer";
