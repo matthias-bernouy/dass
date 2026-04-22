@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { SignJWT, exportJWK, generateKeyPair, type CryptoKey } from "jose";
 
-import { KeycloakAuthenticationConsumer } from "../src/Authentication/consumers/KeycloakAuthenticationConsumer";
+import { KeycloakConsumer } from "../src/Authentication/consumers/KeycloakConsumer";
 import { FakeRunner } from "./helpers/FakeRunner";
 
 const ISSUER = "http://kc.test/realms/aelf1er";
@@ -19,7 +19,7 @@ const DISCOVERY_ENDPOINT = `${ISSUER}/.well-known/openid-configuration`;
 let kcPrivateKey: CryptoKey;
 let kcPublicJwk: Awaited<ReturnType<typeof exportJWK>>;
 let runner: FakeRunner;
-let consumer: KeycloakAuthenticationConsumer;
+let consumer: KeycloakConsumer;
 
 /**
  * State held by the mock Keycloak. Tests prime `nextTokenResponse` before
@@ -69,7 +69,7 @@ beforeAll(async () => {
     }) as typeof fetch;
 
     runner = new FakeRunner();
-    consumer = new KeycloakAuthenticationConsumer(runner, {
+    consumer = new KeycloakConsumer(runner, {
         issuer: ISSUER,
         clientId: CLIENT_ID,
         clientSecret: CLIENT_SECRET,

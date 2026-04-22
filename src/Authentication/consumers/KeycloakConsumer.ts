@@ -124,7 +124,7 @@ const FLIGHT_TTL_SECONDS = 600;
  *   - `GET /logout`                    — starts RP-initiated logout
  *   - `GET /post-logout-callback`      — completes logout
  */
-export class KeycloakAuthenticationConsumer<Role extends string = DefaultRole> implements AuthenticationConsumer<Role> {
+export class KeycloakConsumer<Role extends string = DefaultRole> implements AuthenticationConsumer<Role> {
 
     readonly loginUrl: string;
     readonly logoutUrl: string;
@@ -149,7 +149,7 @@ export class KeycloakAuthenticationConsumer<Role extends string = DefaultRole> i
 
     constructor(runner: Runner, config: KeycloakConsumerConfig<Role>) {
         if (!config.sessionSecret || config.sessionSecret.length < 16) {
-            throw new Error("KeycloakAuthenticationConsumer: sessionSecret must be a strong secret (>= 16 chars).");
+            throw new Error("KeycloakConsumer: sessionSecret must be a strong secret (>= 16 chars).");
         }
 
         this._issuer = stripTrailingSlash(config.issuer);
