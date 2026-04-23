@@ -11,6 +11,10 @@
         ".": {
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js"
+        },
+        "./ui": { 
+            "import": "./dist/ui.js",     
+            "types": "./dist/ui.d.ts"
         }
     },
     "scripts": {

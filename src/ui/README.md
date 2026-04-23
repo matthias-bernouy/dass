@@ -1,0 +1,40 @@
+ Form Components                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                
+  - <p9r-button> — Bouton formulaire associé au DOM natif, supporte submit/reset                                                                                                                                                                                                
+  - <p9r-input> — Champ input texte                                                                                                                                                                                                                                             
+  - <w13c-checkbox> — Case à cocher                                                                                                                                                                                                                                             
+  - <p9r-range> — Slider/curseur pour sélectionner une plage                                                                                                                                                                                                                    
+  - <p9r-select> — Menu déroulant de sélection                                                                                                                                                                                                                                  
+  - <p9r-sizes-select> — Select spécialisé pour les tailles                                                                                                                                                                                                                     
+  - <p9r-segmented-switch> — Boutons segmentés pour choix multiples                                                                                                                                                                                                             
+  - <p9r-section> — Section de formulaire (groupement)                                                                                                                                                                                                                          
+  - <p9r-tag-suggest> — Champ avec suggestions de tags                                                                                                                                                                                                                          
+  - <w13c-input-file> — Upload de fichier                                                                                                                                                                                                                                       
+                                                                                                                                                                                                                                                                                
+  Dialog & Modal                                                                                                                                                                                                                                                                
+                  
+  - <w13c-lateral-dialog> — Panneau modal qui slide depuis le côté                                                                                                                                                                                                              
+  - <p9r-form-dialog> — Dialog contenant un formulaire
+                                                                                                                                                                                                                                                                                
+  Layout & Navigation
+                                                                                                                                                                                                                                                                                
+  - <w13c-left-menu-layout> — Layout avec menu latéral gauche                                                                                                                                                                                                                   
+  - <w13c-lateral-menu> — Menu qui s'affiche latéralement
+  - <w13c-lateral-menu-item> — Item dans le menu latéral                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                
+  Table
+                                                                                                                                                                                                                                                                                
+  - <p9r-table> — Tableau principal
+  - <p9r-row> — Ligne du tableau
+  - <p9r-cell> — Cellule du tableau                                                                                                                                                                                                                                             
+  - <p9r-header-cell> — Cellule d'en-tête du tableau
+                                                                                                                                                                                                                                                                                
+  Notification    
+                                                                                                                                                                                                                                                                                
+  - <p9r-toast> — Notification temporaire (success/error/warning/info)                                                                                                                                                                                                          
+  - <p9r-toast-stack> — Conteneur pour gérer plusieurs toasts
+                                                                                                                                                                                                                                                                                
+  Autres          
+                                                                                                                                                                                                                                                                                
+  - <p9r-tag> — Badge/étiquette                                                                                                                                                                                                                                                 
+  - <p9r-horizontal-action-group> — Groupe de boutons d'action horizontal
