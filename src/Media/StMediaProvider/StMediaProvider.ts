@@ -265,7 +265,7 @@ export class StMediaProvider {
             }
         }
 
-        return new Response(out, {
+        return new Response(out as unknown as BodyInit, {
             status:  200,
             headers: {
                 "Content-Type":           mime,

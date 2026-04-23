@@ -84,7 +84,7 @@ export class StMediaConsumer implements Media {
         const form = new FormData();
         const blob = opts.data instanceof Blob
             ? opts.data
-            : new Blob([opts.data as Uint8Array], opts.mimeType ? { type: opts.mimeType } : undefined);
+            : new Blob([opts.data as unknown as BlobPart], opts.mimeType ? { type: opts.mimeType } : undefined);
         form.append("file", blob, opts.name);
         if (opts.folderID)  form.append("folderID",  opts.folderID);
         if (opts.mimeType)  form.append("mimeType",  opts.mimeType);

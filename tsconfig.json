@@ -2,7 +2,8 @@
 	"compilerOptions": {
 		"types": ["bun-types"],
 		"lib": [
-			"ESNext"
+			"ESNext",
+			"DOM"
 		],
 		"target": "ESNext",
 		"module": "Preserve",

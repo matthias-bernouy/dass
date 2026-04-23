@@ -81,7 +81,7 @@ export class DefaultRunner implements Runner {
     delete(path: string, handler: RouteHandler, middlewares: Middleware[] = []) { this.addEndpoint('DELETE', path, handler, middlewares); }
     put(path: string, handler: RouteHandler, middlewares: Middleware[] = []) { this.addEndpoint('PUT', path, handler, middlewares); }
 
-    setDefaultEndpoint(method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH', handler: RouteHandler, middlewares: Middleware[] = []): void {
+    setDefaultEndpoint(method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS', handler: RouteHandler, middlewares: Middleware[] = []): void {
         this._registerDefaultEndpoint(method, "/", handler, middlewares);
     }
 
