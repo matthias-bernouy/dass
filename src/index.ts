@@ -1,43 +1,45 @@
 // Runner
-export * from "./Runner/Runner";
-export * from "./Runner/DefaultRunner";
+export * from "./interfaces/Runner";
+export * from "./default-implementation/RunnerProvider/RunnerProvider";
 
 // Authentication — contracts
-export * from "./Authentication/interfaces/Authentication";
-export * from "./Authentication/interfaces/AuthenticationConsumer";
-export * from "./Authentication/providers/TokenProvider/ApiTokenRepository";
+export * from "./interfaces/Authentication/Authentication";
+export * from "./interfaces/Authentication/AuthenticationConsumer";
+export * from "./default-implementation/AuthProvider/TokenProvider/ApiTokenRepository";
 
 // Authentication — composite / cross-cutting
-export * from "./Authentication/CompositeAuthentication";
+export * from "./default-implementation/AuthProvider/CompositeAuthentication";
 
 // Authentication — consumers
-export * from "./Authentication/consumers/KeycloakConsumer";
-export * from "./Authentication/consumers/TokenConsumer";
+export * from "./default-implementation/AuthProvider/Keycloak/KeycloakConsumer";
+export * from "./default-implementation/AuthProvider/TokenProvider/TokenConsumer";
 export * from "./Authentication/consumers/DevConsumer";
 
 // Authentication — providers
-export * from "./Authentication/providers/TokenProvider/TokenProvider";
-export * from "./Authentication/providers/TokenProvider/InMemoryApiTokenRepository";
-export * from "./Authentication/providers/TokenProvider/MongoApiTokenRepository";
+export * from "./default-implementation/AuthProvider/TokenProvider/TokenProvider";
+export * from "./default-implementation/AuthProvider/TokenProvider/InMemoryApiTokenRepository";
+export * from "./default-implementation/AuthProvider/TokenProvider/MongoApiTokenRepository";
 
 // Mailer
-export * from "./Mailer/Mailer";
-export * from "./Mailer/DefaultConsoleMailer";
-export * from "./Mailer/DefaultSmtpMailer";
+export * from "./interfaces/Mailer";
+export * from "./default-implementation/MailerProvider/ConsoleMailer";
+export * from "./default-implementation/MailerProvider/SmtpMailer";
 
 // Media
-export * from "./Media/Media";
+export * from "./interfaces/Media";
 export * from "./Media/StMediaProvider/MediaStorage";
 export * from "./Media/StMediaProvider/InMemoryMediaStorage";
 export * from "./Media/StMediaProvider/StMediaProvider";
 export * from "./Media/StMediaProvider/StMediaConsumer";
-export * from "./Media/MtMediaProvider/Bucket";
-export * from "./Media/MtMediaProvider/InMemoryBucketRepository";
-export * from "./Media/MtMediaProvider/BucketMediaStorage";
-export * from "./Media/MtMediaProvider/InMemoryBucketMediaStorage";
-export * from "./Media/MtMediaProvider/MtMediaProvider";
-export * from "./Media/MtMediaProvider/MtMediaConsumer";
-export * from "./Media/MtMediaProvider/MtMediaTokenBroker";
+export * from "./default-implementation/MediaProvider/src/interfaces/Bucket";
+export * from "./default-implementation/MediaProvider/src/interfaces/BucketMediaStorage";
+export * from "./default-implementation/MediaProvider/src/interfaces/ProviderContext";
+export * from "./default-implementation/MediaProvider/default-implementation/InMemoryBucketRepository";
+export * from "./default-implementation/MediaProvider/default-implementation/InMemoryBucketMediaStorage";
+export * from "./default-implementation/MediaProvider/src/MediaProvider";
+export * from "./default-implementation/MediaProvider/src/core/MediaConsumer/MtMediaConsumer";
+export * from "./default-implementation/MediaProvider/src/core/MediaTokenBroker/MtMediaTokenBroker";
+export * from "./default-implementation/MediaProvider/types/types";
 
 // UI toolkit (Web Components base + primitives)
 export * from "./ui/Component";

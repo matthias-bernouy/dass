@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Configuration — MediaHub admin</title>
+    <link rel="stylesheet" href="../assets/style.css" />
+    <script type="module" src="../assets/w13c.js"></script>
+</head>
+
+<body>
+
+<w13c-left-menu-layout>
+    <w13c-lateral-menu slot="sidebar">
+        <h1 slot="header">MediaHub <span>admin</span></h1>
+        <w13c-lateral-menu-item href="../admin/dashboard.html">Buckets</w13c-lateral-menu-item>
+        <w13c-lateral-menu-item href="#" badge="soon">Usage</w13c-lateral-menu-item>
+        <w13c-lateral-menu-item href="#" badge="soon">Audit</w13c-lateral-menu-item>
+    </w13c-lateral-menu>
+
+    <div class="page">
+        <header class="page-header">
+            <div>
+                <h1 id="bucket-title">…</h1>
+                <p class="muted"><a href="../admin/dashboard.html">← Tous les buckets</a></p>
+            </div>
+        </header>
+
+        <nav class="tabs" id="tabs"></nav>
+
+        <div id="flash-area"></div>
+
+        <div class="card">
+            <h3>Identité du bucket</h3>
+            <p9r-input id="field-name" label="Nom affiché" hint="Sert uniquement à l'admin."></p9r-input>
+            <div class="row" style="margin-top: 0.75rem;">
+                <p9r-button id="save-name-btn" variant="filled" color="primary">Enregistrer</p9r-button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Secret partagé</h3>
+            <p class="muted">Utilisé par le <code>MtMediaTokenBroker</code> de l'app pour mint des tokens. Seul son SHA-256 est stocké — on ne peut pas le relire, uniquement le rotater.</p>
+            <p9r-button id="rotate-btn" variant="outlined" color="warning">Rotate le secret</p9r-button>
+            <p class="muted" style="margin-top: 0.5rem;">Le précédent cesse de fonctionner immédiatement.</p>
+        </div>
+
+        <div class="card">
+            <h3>Origines CORS autorisées <span class="disabled-hint">provider-wide</span></h3>
+            <p class="muted">Pour l'instant la liste d'origines est définie au niveau du provider via <code>corsAllowedOrigins</code>. Un override par bucket arrivera plus tard.</p>
+            <p9r-input label="Origines (liste CSV)" placeholder="https://app.example.com, https://cms.example.com" disabled></p9r-input>
+        </div>
+
+        <div class="card">
+            <h3>Webhooks <span class="disabled-hint">soon</span></h3>
+            <p class="muted">Notifier une URL externe à chaque upload / delete / rename.</p>
+            <p9r-input label="URL cible" placeholder="https://…" disabled></p9r-input>
+            <p9r-input label="Secret HMAC" placeholder="whsec_…" disabled></p9r-input>
+        </div>
+
+        <div class="card card--err">
+            <h3>Danger</h3>
+            <p class="muted">Supprime le bucket et purge tous les items + bytes. Irréversible.</p>
+            <p9r-button id="delete-btn" variant="filled" color="danger">Supprimer le bucket</p9r-button>
+        </div>
+    </div>
+</w13c-left-menu-layout>
+
+<p9r-form-dialog id="rotate-dialog"
+    method="POST"
+    enctype="multipart/form-data">
+    <span slot="title">Rotate le secret</span>
+    <p>Un nouveau secret sera généré. <strong>Le précédent cesse de fonctionner immédiatement</strong> — les apps qui l'utilisent doivent être reconfigurées.</p>
+</p9r-form-dialog>
+
+<p9r-form-dialog id="delete-dialog"
+    method="POST"
+    enctype="multipart/form-data">
+    <span slot="title">Supprimer le bucket</span>
+    <p><strong>Irréversible.</strong> Tous les items, fichiers et la config du bucket seront purgés.</p>
+</p9r-form-dialog>
+
+<p9r-form-dialog id="save-name-dialog"
+    method="POST"
+    enctype="multipart/form-data">
+    <span slot="title">Enregistrer le nom</span>
+    <p>Mettre à jour le nom du bucket.</p>
+    <input type="hidden" name="name" id="save-name-value" />
+</p9r-form-dialog>
+
+<script type="module">
+    function escapeHtml(s) {
+        return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    const bucketID = new URLSearchParams(location.search).get("id");
+    if (!bucketID) {
+        location.href = "../admin/dashboard.html";
+        throw new Error("redirecting");
+    }
+
+    // Tab nav
+    const tabs = [
+        { href: "./dashboard.html?id="  + encodeURIComponent(bucketID), label: "Dashboard",     match: "dashboard" },
+        { href: "./config.html?id="     + encodeURIComponent(bucketID), label: "Configuration", match: "config" },
+        { href: "./limitation.html?id=" + encodeURIComponent(bucketID), label: "Limites",       match: "limitation" },
+    ];
+    const tabNav = document.getElementById("tabs");
+    const current = "config";
+    for (const t of tabs) {
+        const a = document.createElement("a");
+        a.href = t.href;
+        a.textContent = t.label;
+        if (t.match === current) a.classList.add("active");
+        tabNav.appendChild(a);
+    }
+
+    // Flash message — rotate redirects back here with ?newSecret=…
+    function consumeFlash() {
+        const q = new URLSearchParams(location.search);
+        const newSecret = q.get("newSecret");
+        if (newSecret) {
+            const card = document.createElement("div");
+            card.className = "card card--warn";
+            card.innerHTML = `
+                <h3>Nouveau secret généré</h3>
+                <p class="muted">Copie-le maintenant. Il ne sera plus jamais affiché.</p>
+                <code class="secret-value">${escapeHtml(newSecret)}</code>`;
+            document.getElementById("flash-area").appendChild(card);
+            const url = new URL(location.href);
+            url.searchParams.delete("newSecret");
+            url.searchParams.delete("newBucketId");
+            history.replaceState(null, "", url.pathname + url.search);
+        }
+    }
+
+    async function loadBucket() {
+        const res = await fetch("../bucket?bucket=" + encodeURIComponent(bucketID));
+        if (!res.ok) return;
+        const body = await res.json();
+        if (!body.ok) return;
+        const b = body.data;
+        document.title = b.name + " — Configuration";
+        document.getElementById("bucket-title").textContent = b.name;
+        document.getElementById("field-name").value = b.name;
+    }
+
+    // Wire dialogs. Actions are URLs templated with the current bucket id.
+    const rotateDialog = document.getElementById("rotate-dialog");
+    rotateDialog.setAttribute("action", "../admin/buckets/rotate?id=" + encodeURIComponent(bucketID));
+    document.getElementById("rotate-btn").addEventListener("click", () => rotateDialog.showModal());
+
+    const deleteDialog = document.getElementById("delete-dialog");
+    deleteDialog.setAttribute("action", "../admin/buckets/delete?id=" + encodeURIComponent(bucketID));
+    document.getElementById("delete-btn").addEventListener("click", () => deleteDialog.showModal());
+
+    const saveNameDialog = document.getElementById("save-name-dialog");
+    saveNameDialog.setAttribute("action", "../admin/buckets/update?id=" + encodeURIComponent(bucketID));
+    document.getElementById("save-name-btn").addEventListener("click", () => {
+        document.getElementById("save-name-value").value = document.getElementById("field-name").value;
+        saveNameDialog.showModal();
+    });
+
+    consumeFlash();
+    loadBucket();
+</script>
+
+</body>
+
+</html>

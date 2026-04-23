@@ -1,0 +1,54 @@
+<w13c-left-menu-layout>
+    <w13c-lateral-menu>
+
+        <w13c-lateral-menu-item href="./test3">
+            <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <path d="M12 11h4" />
+                <path d="M12 16h4" />
+                <path d="M8 11h.01" />
+                <path d="M8 16h.01" />
+            </svg>
+            Pages
+        </w13c-lateral-menu-item>
+
+        <w13c-lateral-menu-item href="./test2">
+            <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <path d="M12 11h4" />
+                <path d="M12 16h4" />
+                <path d="M8 11h.01" />
+                <path d="M8 16h.01" />
+            </svg>
+            Pages
+        </w13c-lateral-menu-item>
+
+        <w13c-lateral-menu-item href="./test1">
+            <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <path d="M12 11h4" />
+                <path d="M12 16h4" />
+                <path d="M8 11h.01" />
+                <path d="M8 16h.01" />
+            </svg>
+            Pages
+        </w13c-lateral-menu-item>
+    </w13c-lateral-menu>
+    <div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+            <h1 style="margin: 0; line-height: 1;">
+                <slot name="title"></slot>
+            </h1>
+
+            <div style="display: flex; align-items: center; gap: 0.75rem;padding-top: 4px">
+                <slot name="action"></slot>
+            </div>
+        </div>
+        <slot></slot>
+
+    </div>
+</w13c-left-menu-layout>

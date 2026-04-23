@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Buckets — MediaHub admin</title>
+    <link rel="stylesheet" href="../assets/style.css" />
+    <script type="module" src="../assets/w13c.js"></script>
+</head>
+
+<body>
+
+<w13c-left-menu-layout>
+    <w13c-lateral-menu slot="sidebar">
+        <h1 slot="header">MediaHub <span>admin</span></h1>
+        <w13c-lateral-menu-item href="./dashboard.html">Buckets</w13c-lateral-menu-item>
+        <w13c-lateral-menu-item href="#" badge="soon">Usage</w13c-lateral-menu-item>
+        <w13c-lateral-menu-item href="#" badge="soon">Audit</w13c-lateral-menu-item>
+    </w13c-lateral-menu>
+
+    <div class="page">
+        <header class="page-header">
+            <div>
+                <h1>Buckets</h1>
+                <p class="muted" id="session-info">…</p>
+            </div>
+            <p9r-button variant="filled" color="primary" id="create-btn">Nouveau bucket</p9r-button>
+        </header>
+
+        <div id="flash-area"></div>
+
+        <p9r-table>
+            <p9r-row slot="header">
+                <p9r-header-cell>Nom</p9r-header-cell>
+                <p9r-header-cell>ID</p9r-header-cell>
+                <p9r-header-cell>Max size</p9r-header-cell>
+                <p9r-header-cell>MIMEs</p9r-header-cell>
+                <p9r-header-cell>Créé</p9r-header-cell>
+                <p9r-header-cell></p9r-header-cell>
+            </p9r-row>
+            <div id="bucket-rows"></div>
+        </p9r-table>
+    </div>
+</w13c-left-menu-layout>
+
+<p9r-form-dialog id="create-dialog"
+    action="./buckets"
+    method="POST"
+    enctype="multipart/form-data">
+    <span slot="title">Créer un bucket</span>
+    <p9r-input name="name" label="Nom" placeholder="cms-x" required max-count="120"></p9r-input>
+</p9r-form-dialog>
+
+<script type="module">
+    function escapeHtml(s) {
+        return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+    function formatBytes(n) {
+        if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + " MiB";
+        if (n >= 1024)        return (n / 1024).toFixed(1) + " KiB";
+        return n + " o";
+    }
+
+    // Flash messages passed through server redirects (?newSecret, ?error).
+    function consumeFlash() {
+        const q = new URLSearchParams(location.search);
+        const flash = document.getElementById("flash-area");
+        const newSecret = q.get("newSecret");
+        const newBucketId = q.get("newBucketId");
+        const error = q.get("error");
+        if (newSecret) {
+            const card = document.createElement("div");
+            card.className = "card card--warn";
+            card.innerHTML = `
+                <h3>Nouveau secret — bucket <code>${escapeHtml(newBucketId || "")}</code></h3>
+                <p class="muted">Copie-le maintenant. Il ne sera plus jamais affiché.</p>
+                <code class="secret-value">${escapeHtml(newSecret)}</code>`;
+            flash.appendChild(card);
+        }
+        if (error) {
+            const card = document.createElement("div");
+            card.className = "card card--err";
+            card.innerHTML = `<strong>Erreur</strong> — ${escapeHtml(error)}`;
+            flash.appendChild(card);
+        }
+        if (newSecret || error) history.replaceState(null, "", location.pathname);
+    }
+
+    async function loadSession() {
+        try {
+            const res = await fetch("./api/session");
+            if (!res.ok) return;
+            const body = await res.json();
+            const s = body.data;
+            document.getElementById("session-info").innerHTML =
+                `Connecté en tant que <strong>${escapeHtml(s.displayName || s.identifier)}</strong>
+                · <a href="${escapeHtml(s.logoutUrl)}">Se déconnecter</a>`;
+        } catch {}
+    }
+
+    async function loadBuckets() {
+        const host = document.getElementById("bucket-rows");
+        host.innerHTML = "";
+        const res = await fetch("./api/buckets");
+        if (res.status === 401 || res.status === 403) {
+            location.href = "../forbidden.html";
+            return;
+        }
+        if (!res.ok) {
+            host.innerHTML = `<p9r-row><p9r-cell>Erreur de chargement (${res.status})</p9r-cell></p9r-row>`;
+            return;
+        }
+        const body = await res.json();
+        const buckets = body.data ?? [];
+        if (buckets.length === 0) {
+            host.innerHTML = `<p9r-row><p9r-cell><span class="muted">Aucun bucket. Crée-en un pour commencer.</span></p9r-cell></p9r-row>`;
+            return;
+        }
+        for (const b of buckets) {
+            const mime = b.acceptedMimeTypes === "*" ? "*" : b.acceptedMimeTypes.join(", ");
+            const row = document.createElement("p9r-row");
+            row.setAttribute("href", "../bucket/dashboard.html?id=" + encodeURIComponent(b.id));
+            row.innerHTML =
+                `<p9r-cell><strong>${escapeHtml(b.name)}</strong></p9r-cell>` +
+                `<p9r-cell><code>${escapeHtml(b.id)}</code></p9r-cell>` +
+                `<p9r-cell>${formatBytes(b.maxFileSize)}</p9r-cell>` +
+                `<p9r-cell>${escapeHtml(mime)}</p9r-cell>` +
+                `<p9r-cell>${new Date(b.createdAt).toISOString().slice(0, 10)}</p9r-cell>` +
+                `<p9r-cell class="muted">→</p9r-cell>`;
+            host.appendChild(row);
+        }
+    }
+
+    document.getElementById("create-btn").addEventListener("click", () => {
+        document.getElementById("create-dialog").showModal();
+    });
+
+    consumeFlash();
+    loadSession();
+    loadBuckets();
+</script>
+
+</body>
+
+</html>

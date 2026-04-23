@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Limites — MediaHub admin</title>
+    <link rel="stylesheet" href="../assets/style.css" />
+    <script type="module" src="../assets/w13c.js"></script>
+</head>
+
+<body>
+
+<w13c-left-menu-layout>
+    <w13c-lateral-menu slot="sidebar">
+        <h1 slot="header">MediaHub <span>admin</span></h1>
+        <w13c-lateral-menu-item href="../admin/dashboard.html">Buckets</w13c-lateral-menu-item>
+        <w13c-lateral-menu-item href="#" badge="soon">Usage</w13c-lateral-menu-item>
+        <w13c-lateral-menu-item href="#" badge="soon">Audit</w13c-lateral-menu-item>
+    </w13c-lateral-menu>
+
+    <div class="page">
+        <header class="page-header">
+            <div>
+                <h1 id="bucket-title">…</h1>
+                <p class="muted"><a href="../admin/dashboard.html">← Tous les buckets</a></p>
+            </div>
+        </header>
+
+        <nav class="tabs" id="tabs"></nav>
+
+        <div id="flash-area"></div>
+
+        <div class="card">
+            <h3>Fichiers — tailles</h3>
+            <div class="stack">
+                <p9r-input id="field-max-file-size" name="maxFileSize" label="maxFileSize" hint="Taille maxi d'un upload individuel, en octets." type="text"></p9r-input>
+                <p9r-input id="field-max-size-per-file" name="maxSizePerFile" label="maxSizePerFile (soon)" hint="Alias de maxFileSize, par type MIME. Pas encore appliqué." disabled></p9r-input>
+                <p9r-input id="field-max-bucket-size" name="maxBucketSize" label="maxBucketSize (soon)" hint="Volume total maximum stocké par le bucket (octets)." disabled></p9r-input>
+                <p9r-input id="field-max-files" name="maxFiles" label="maxFiles (soon)" hint="Nombre total d'items autorisés dans le bucket." disabled></p9r-input>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Images — dimensions</h3>
+            <div class="stack">
+                <p9r-input id="field-max-width" name="maxWidth" label="maxWidth (soon)" hint="Largeur maxi en pixels des images uploadées (pré-resize)." disabled></p9r-input>
+                <p9r-input id="field-max-height" name="maxHeight" label="maxHeight (soon)" hint="Hauteur maxi en pixels." disabled></p9r-input>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Types MIME</h3>
+            <p9r-input id="field-accepted-mimes" name="acceptedMimeTypes" label="acceptedMimeTypes" hint='"*" pour tout, ou liste CSV (ex: image/png, image/jpeg, application/pdf).'></p9r-input>
+        </div>
+
+        <div class="row">
+            <p9r-button id="save-btn" variant="filled" color="primary">Enregistrer</p9r-button>
+            <p9r-button id="reset-btn" variant="ghost">Annuler</p9r-button>
+        </div>
+    </div>
+</w13c-left-menu-layout>
+
+<p9r-form-dialog id="save-dialog"
+    method="POST"
+    enctype="multipart/form-data">
+    <span slot="title">Confirmer la mise à jour</span>
+    <p>Les nouvelles limites remplacent immédiatement les précédentes. Les uploads en cours qui dépassent les nouveaux seuils seront rejetés.</p>
+    <input type="hidden" name="name"                id="hidden-name" />
+    <input type="hidden" name="maxFileSize"         id="hidden-max-file-size" />
+    <input type="hidden" name="acceptedMimeTypes"   id="hidden-mimes" />
+</p9r-form-dialog>
+
+<script type="module">
+    const bucketID = new URLSearchParams(location.search).get("id");
+    if (!bucketID) {
+        location.href = "../admin/dashboard.html";
+        throw new Error("redirecting");
+    }
+
+    // Tab nav
+    const tabs = [
+        { href: "./dashboard.html?id="  + encodeURIComponent(bucketID), label: "Dashboard",     match: "dashboard" },
+        { href: "./config.html?id="     + encodeURIComponent(bucketID), label: "Configuration", match: "config" },
+        { href: "./limitation.html?id=" + encodeURIComponent(bucketID), label: "Limites",       match: "limitation" },
+    ];
+    const tabNav = document.getElementById("tabs");
+    const current = "limitation";
+    for (const t of tabs) {
+        const a = document.createElement("a");
+        a.href = t.href;
+        a.textContent = t.label;
+        if (t.match === current) a.classList.add("active");
+        tabNav.appendChild(a);
+    }
+
+    let currentBucket = null;
+
+    async function loadBucket() {
+        const res = await fetch("../bucket?bucket=" + encodeURIComponent(bucketID));
+        if (!res.ok) return;
+        const body = await res.json();
+        if (!body.ok) return;
+        currentBucket = body.data;
+        document.title = currentBucket.name + " — Limites";
+        document.getElementById("bucket-title").textContent = currentBucket.name;
+        document.getElementById("field-max-file-size").value  = String(currentBucket.maxFileSize);
+        document.getElementById("field-accepted-mimes").value = currentBucket.acceptedMimeTypes === "*"
+            ? "*"
+            : currentBucket.acceptedMimeTypes.join(", ");
+    }
+
+    document.getElementById("reset-btn").addEventListener("click", () => {
+        if (!currentBucket) return;
+        document.getElementById("field-max-file-size").value  = String(currentBucket.maxFileSize);
+        document.getElementById("field-accepted-mimes").value = currentBucket.acceptedMimeTypes === "*"
+            ? "*"
+            : currentBucket.acceptedMimeTypes.join(", ");
+    });
+
+    const saveDialog = document.getElementById("save-dialog");
+    saveDialog.setAttribute("action", "../admin/buckets/update?id=" + encodeURIComponent(bucketID));
+    document.getElementById("save-btn").addEventListener("click", () => {
+        if (!currentBucket) return;
+        document.getElementById("hidden-name").value          = currentBucket.name;
+        document.getElementById("hidden-max-file-size").value = document.getElementById("field-max-file-size").value;
+        document.getElementById("hidden-mimes").value         = document.getElementById("field-accepted-mimes").value;
+        saveDialog.showModal();
+    });
+
+    loadBucket();
+</script>
+
+</body>
+
+</html>
