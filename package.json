@@ -29,10 +29,15 @@
         "nodemailer": "^6.9.16"
     },
     "peerDependenciesMeta": {
-        "mongodb": { "optional": true },
-        "nodemailer": { "optional": true }
+        "mongodb": {
+            "optional": true
+        },
+        "nodemailer": {
+            "optional": true
+        }
     },
     "dependencies": {
-        "jose": "^6.2.1"
+        "jose": "^6.2.1",
+        "sharp": "^0.34.5"
     }
 }

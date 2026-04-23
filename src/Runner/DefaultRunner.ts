@@ -8,7 +8,15 @@ function normalizePath(p: string): string {
     return p.length > 1 && p.endsWith("/") ? p.slice(0, -1) : p;
 }
 
+function pathUnderPrefix(pathname: string, prefix: string): boolean {
+    if (prefix === "/") return true;
+    return pathname === prefix || pathname.startsWith(prefix + "/");
+}
+
 export class DefaultRunner implements Runner {
+
+    basePath: string = "/";
+
     private routes: Array<{
         method: string;
         path: string;
@@ -17,6 +25,13 @@ export class DefaultRunner implements Runner {
     }> = [];
 
     private globalMiddlewares: Middleware[] = [];
+
+    private defaultEndpoints: Array<{
+        method: string;
+        prefix: string;
+        handler: RouteHandler;
+        middlewares: Middleware[];
+    }> = [];
 
     addEndpoint(method: string, path: string, handler: RouteHandler, middlewares: Middleware[] = []): void {
         this.routes.push({
@@ -38,6 +53,7 @@ export class DefaultRunner implements Runner {
 
         const scopedRunner: Runner = {
             ...this,
+            basePath: currentPrefix,
             addEndpoint: (method, path, handler, middleware = []) => {
                 this.addEndpoint(method, urlJoin(currentPrefix, path), handler, [...currentMiddlewares, ...middleware]);
             },
@@ -49,7 +65,11 @@ export class DefaultRunner implements Runner {
 
             group: (p, c, m = []) => {
                 this.group(urlJoin(currentPrefix, p), c, [...currentMiddlewares, ...m]);
-            }
+            },
+
+            setDefaultEndpoint: (method, handler, middleware = []) => {
+                this._registerDefaultEndpoint(method, currentPrefix, handler, [...currentMiddlewares, ...middleware]);
+            },
         };
 
         callback(scopedRunner);
@@ -60,6 +80,15 @@ export class DefaultRunner implements Runner {
     patch(path: string, handler: RouteHandler, middlewares: Middleware[] = []) { this.addEndpoint('PATCH', path, handler, middlewares); }
     delete(path: string, handler: RouteHandler, middlewares: Middleware[] = []) { this.addEndpoint('DELETE', path, handler, middlewares); }
     put(path: string, handler: RouteHandler, middlewares: Middleware[] = []) { this.addEndpoint('PUT', path, handler, middlewares); }
+
+    setDefaultEndpoint(method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH', handler: RouteHandler, middlewares: Middleware[] = []): void {
+        this._registerDefaultEndpoint(method, "/", handler, middlewares);
+    }
+
+    private _registerDefaultEndpoint(method: string, prefix: string, handler: RouteHandler, middlewares: Middleware[]): void {
+        this.defaultEndpoints = this.defaultEndpoints.filter(d => !(d.method === method && d.prefix === prefix));
+        this.defaultEndpoints.push({ method, prefix, handler, middlewares });
+    }
 
     start(port: number = 3000): void {
         const self = this;
@@ -75,11 +104,18 @@ export class DefaultRunner implements Runner {
                     r.method === method && self.matchPath(r.path, pathname)
                 );
 
-                if (!route) {
+                const fallback = route ? null : self.defaultEndpoints
+                    .filter(d => d.method === method && pathUnderPrefix(pathname, d.prefix))
+                    .sort((a, b) => b.prefix.length - a.prefix.length)[0]
+                    ?? null;
+
+                const effective = route ?? fallback;
+
+                if (!effective) {
                     return new Response("Not Found", { status: 404 });
                 }
 
-                const allMiddlewares = [...self.globalMiddlewares, ...route.middlewares];
+                const allMiddlewares = [...self.globalMiddlewares, ...effective.middlewares];
 
                 let index = 0;
                 const next = async (req: Request): Promise<Response> => {
@@ -87,7 +123,7 @@ export class DefaultRunner implements Runner {
                         const middleware = allMiddlewares[index++]!;
                         return middleware(req, () => next(req));
                     }
-                    return route.handler(req);
+                    return effective.handler(req);
                 };
 
                 try {

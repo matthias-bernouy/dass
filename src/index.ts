@@ -24,3 +24,10 @@ export * from "./Authentication/providers/TokenProvider/MongoApiTokenRepository"
 export * from "./Mailer/Mailer";
 export * from "./Mailer/DefaultConsoleMailer";
 export * from "./Mailer/DefaultSmtpMailer";
+
+// Media
+export * from "./Media/Media";
+export * from "./Media/StMediaProvider/MediaStorage";
+export * from "./Media/StMediaProvider/InMemoryMediaStorage";
+export * from "./Media/StMediaProvider/StMediaProvider";
+export * from "./Media/StMediaProvider/StMediaConsumer";

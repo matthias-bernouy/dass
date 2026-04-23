@@ -10,6 +10,9 @@ export type RouteHandler = (req: Request) => Response | Promise<Response>;
 export type Middleware = (req: Request, next: () => Promise<Response>) => Promise<Response>;
 
 export interface Runner {
+
+    readonly basePath: string;
+
     /**
      * Registers a new HTTP endpoint.
      * @param method HTTP verb (GET, POST, PUT, DELETE, etc.)
@@ -44,6 +47,18 @@ export interface Runner {
 
     /** Helper for quick PUT route registration */
     put(path: string, handler: RouteHandler, middlewares?: Middleware[]): void;
+
+    /**
+     * Sets a fallback handler invoked when no registered route matches the
+     * request path but the method matches. Useful for SPA-style catch-alls
+     * or asset serving under a prefix that should natively 404 on misses.
+     * Subsequent calls replace the previous default.
+     */
+    setDefaultEndpoint(
+        method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+        handler: RouteHandler,
+        middlewares?: Middleware[]
+    ): void;
 
     start(port?: number): void;
 }
