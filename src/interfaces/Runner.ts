@@ -60,5 +60,25 @@ export interface Runner {
         middlewares?: Middleware[]
     ): void;
 
+    /**
+     * Returns the TCP-level remote address for an in-flight Request, or
+     * `undefined` if not available. Implementations typically delegate to
+     * the shared `getRequestIP` utility so that nested or composed Runners
+     * see the same IP recorded by the outer Runner at request ingress.
+     */
+    getRequestIP(req: Request): string | undefined;
+
+    /**
+     * Removes every registered route whose path matches the given prefix
+     * (exact match OR descendant: `prefix === path` OR `path.startsWith(prefix + "/")`).
+     * Default endpoints registered under matching prefixes are removed as
+     * well. Global middlewares are untouched. Idempotent.
+     *
+     * Used to dynamically tear down a sub-tree of routes — e.g. when a
+     * tenant is deleted in a multi-tenant deployment — without restarting
+     * the server.
+     */
+    removeRoutesByPathPrefix(prefix: string): void;
+
     start(port?: number): void;
 }

@@ -28,6 +28,9 @@ export * from "./interfaces/Authentication/Authentication";
 export * from "./interfaces/Authentication/AuthenticationConsumer";
 export * from "./interfaces/Runner";
 
+// Utilities
+export { getRequestIP } from "./utilities/requestIP";
+
 
 export * from "./serve/serveApiFolder"
  export { default as serveStaticFolder } from "./serve/serveStaticFolder/serveStaticFolder";

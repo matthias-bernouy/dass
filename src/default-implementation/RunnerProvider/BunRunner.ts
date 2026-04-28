@@ -1,4 +1,5 @@
 import type { Runner, RouteHandler, Middleware } from "../../interfaces/Runner";
+import { setRequestIP, getRequestIP as readRequestIP } from "../../utilities/requestIP";
 
 function urlJoin(...parts: string[]): string {
     return ("/" + parts.join("/")).replace(/\/+/g, "/") || "/";
@@ -70,6 +71,12 @@ export class BunRunner implements Runner {
             setDefaultEndpoint: (method, handler, middleware = []) => {
                 this._registerDefaultEndpoint(method, currentPrefix, handler, [...currentMiddlewares, ...middleware]);
             },
+
+            getRequestIP: (req) => this.getRequestIP(req),
+
+            removeRoutesByPathPrefix: (prefix) => {
+                this.removeRoutesByPathPrefix(urlJoin(currentPrefix, prefix));
+            },
         };
 
         callback(scopedRunner);
@@ -85,6 +92,18 @@ export class BunRunner implements Runner {
         this._registerDefaultEndpoint(method, "/", handler, middlewares);
     }
 
+    getRequestIP(req: Request): string | undefined {
+        return readRequestIP(req);
+    }
+
+    removeRoutesByPathPrefix(prefix: string): void {
+        const norm = normalizePath(prefix);
+        const matches = (path: string): boolean =>
+            path === norm || path.startsWith(norm + "/");
+        this.routes = this.routes.filter(r => !matches(r.path));
+        this.defaultEndpoints = this.defaultEndpoints.filter(d => !matches(d.prefix));
+    }
+
     private _registerDefaultEndpoint(method: string, prefix: string, handler: RouteHandler, middlewares: Middleware[]): void {
         this.defaultEndpoints = this.defaultEndpoints.filter(d => !(d.method === method && d.prefix === prefix));
         this.defaultEndpoints.push({ method, prefix, handler, middlewares });
@@ -95,7 +114,10 @@ export class BunRunner implements Runner {
 
         Bun.serve({
             port,
-            async fetch(request) {
+            async fetch(request, server) {
+                const peer = server.requestIP(request);
+                if (peer) setRequestIP(request, peer.address);
+
                 const url = new URL(request.url);
                 const method = request.method;
                 const pathname = normalizePath(url.pathname);
