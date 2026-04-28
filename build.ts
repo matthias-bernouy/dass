@@ -24,7 +24,7 @@ async function build() {
         const result = await Bun.build({
             entrypoints: ["src/index.ts"],
             outdir: "dist",
-            target: "node",
+            target: "bun",
         });
 
         if (!result.success) {
