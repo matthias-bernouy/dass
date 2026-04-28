@@ -1,8 +1,8 @@
 import type { Runner } from "@bernouy/socle";
 import { basename, dirname, join } from "node:path";
 
-type HTTPMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-const ALLOWED_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"] as const;
+type HTTPMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
+const ALLOWED_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"] as const;
 
 function isHTTPMethod(s: string): s is HTTPMethod {
     return (ALLOWED_METHODS as readonly string[]).includes(s);
@@ -21,7 +21,7 @@ export async function serveApi<T>(runner: Runner, folder: string, system: T): Pr
     type RouteEntry = { file: string; method: HTTPMethod; route: string };
     const seen = new Map<string, RouteEntry>();
 
-    for await (const file of new Bun.Glob("**/*.ts").scan(folder)) {
+    for await (const file of new Bun.Glob("**/*.{ts,js}").scan({cwd: folder, dot: true})) {
         const parts = file.split(".");
         if (parts.length < 3) continue;
 
