@@ -1,4 +1,4 @@
-import type { DefaultRole } from "../../../../interfaces/Authentication/Authentication";
+import type { DefaultRole } from "../../../../interfaces/Authentication";
 import type { ApiToken, ApiTokenRepository } from "../src/interfaces/ApiTokenRepository";
 
 /**

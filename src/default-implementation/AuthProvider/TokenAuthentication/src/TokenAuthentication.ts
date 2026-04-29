@@ -1,4 +1,4 @@
-import type { Authentication, DefaultRole, Subject } from "../../../../interfaces/Authentication/Authentication";
+import type { Authentication, DefaultRole, Subject } from "../../../../interfaces/Authentication";
 
 export type TokenConsumerConfig<Role extends string = DefaultRole> = {
     /**

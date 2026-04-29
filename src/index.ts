@@ -24,8 +24,7 @@ export * from "./default-implementation/MailerProvider/SmtpMailer";
 // Interfaces
 export * from "./interfaces/Media";
 export * from "./interfaces/Mailer";
-export * from "./interfaces/Authentication/Authentication";
-export * from "./interfaces/Authentication/AuthenticationConsumer";
+export * from "./interfaces/Authentication";
 export * from "./interfaces/Runner";
 
 // Utilities

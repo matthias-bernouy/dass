@@ -1,4 +1,4 @@
-import type { Authentication, DefaultRole, Subject } from "../../../../interfaces/Authentication/Authentication";
+import type { Authentication, DefaultRole, Subject } from "../../../../interfaces/Authentication";
 import type { ApiToken, ApiTokenRepository } from "./interfaces/ApiTokenRepository";
 import type { Runner } from "../../../../interfaces/Runner";
 import { htmlResponse, redirect } from "../../../../utilities/html";

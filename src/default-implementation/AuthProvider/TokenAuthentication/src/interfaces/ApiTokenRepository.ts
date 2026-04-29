@@ -1,4 +1,4 @@
-import type { DefaultRole } from "../../../../../interfaces/Authentication/Authentication";
+import type { DefaultRole } from "../../../../../interfaces/Authentication";
 
 /**
  * A single API token record. The raw bearer string is NEVER stored — only

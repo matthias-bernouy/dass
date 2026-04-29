@@ -1,4 +1,4 @@
-import type { Subject } from "../../../../interfaces/Authentication/Authentication";
+import type { Subject } from "../../../../interfaces/Authentication";
 import type { ApiToken } from "./interfaces/ApiTokenRepository";
 import { escapeHtml } from "../../../../utilities/html";
 

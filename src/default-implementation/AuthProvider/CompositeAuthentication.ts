@@ -1,4 +1,4 @@
-import type { Authentication, DefaultRole, Subject } from "../../interfaces/Authentication/Authentication";
+import type { Authentication, DefaultRole, Subject } from "../../interfaces/Authentication";
 import type { Runner } from "../../interfaces/Runner";
 import { escapeHtml, htmlResponse } from "../../utilities/html";
 
